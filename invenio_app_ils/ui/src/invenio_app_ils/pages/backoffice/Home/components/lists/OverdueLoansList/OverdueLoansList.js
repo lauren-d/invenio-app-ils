@@ -42,8 +42,8 @@ export default class OverdueLoansList extends Component {
     return <SeeAllButton clickHandler={() => _click()} />;
   };
 
-  prepareData() {
-    return this.props.data.map(row => {
+  prepareData(data) {
+    return data.hits.map(row => {
       let serialized = formatter.loan.toTable(row);
       delete serialized['Request created'];
       serialized['Expiration date'] = row.request_expire_date;
@@ -51,8 +51,9 @@ export default class OverdueLoansList extends Component {
     });
   }
 
-  _render_table() {
-    const rows = this.prepareData();
+  _render_table(data) {
+    const rows = this.prepareData(data);
+    rows.totalHits = data.total;
     return (
       <ResultsTable
         rows={rows}
@@ -66,11 +67,10 @@ export default class OverdueLoansList extends Component {
   }
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._render_table()}</Error>
+        <Error error={error}>{this._render_table(data)}</Error>
       </Loader>
     );
   }
@@ -78,7 +78,7 @@ export default class OverdueLoansList extends Component {
 
 OverdueLoansList.propTypes = {
   fetchOverdueLoans: PropTypes.func.isRequired,
-  data: PropTypes.array.isRequired,
+  data: PropTypes.object.isRequired,
   showMaxEntries: PropTypes.number,
 };
 

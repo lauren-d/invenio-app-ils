@@ -12,6 +12,9 @@ const mockGet = jest.fn();
 loanApi.get = mockGet;
 const mockPostAction = jest.fn();
 loanApi.postAction = mockPostAction;
+import { sessionManager } from '../../../../../authentication/services';
+
+sessionManager.user = { id: '2', locationPid: '2' };
 
 const response = { data: {} };
 
@@ -99,7 +102,7 @@ describe('Loan details tests', () => {
 
       const expectedActions = [
         {
-          type: types.ACTION_IS_LOADING,
+          type: types.IS_LOADING,
         },
       ];
 
@@ -110,8 +113,8 @@ describe('Loan details tests', () => {
             'urlForAction',
             '123',
             loan,
-            1,
-            3
+            sessionManager.user.id,
+            sessionManager.user.locationPid
           );
           const actions = store.getActions();
           expect(actions[0]).toEqual(expectedActions[0]);
@@ -124,7 +127,7 @@ describe('Loan details tests', () => {
 
       const expectedActions = [
         {
-          type: types.ACTION_SUCCESS,
+          type: types.SUCCESS,
           payload: response.data,
         },
       ];
@@ -136,8 +139,8 @@ describe('Loan details tests', () => {
             'urlForAction',
             '123',
             loan,
-            1,
-            3
+            sessionManager.user.id,
+            sessionManager.user.locationPid
           );
           const actions = store.getActions();
           expect(actions[1]).toEqual(expectedActions[0]);
@@ -150,7 +153,7 @@ describe('Loan details tests', () => {
 
       const expectedActions = [
         {
-          type: types.ACTION_HAS_ERROR,
+          type: types.HAS_ERROR,
           payload: [500, 'Error'],
         },
       ];
@@ -162,8 +165,8 @@ describe('Loan details tests', () => {
             'wrongUrlForAction',
             '123',
             loan,
-            1,
-            3
+            sessionManager.user.id,
+            sessionManager.user.locationPid
           );
           const actions = store.getActions();
           expect(actions[1]).toEqual(expectedActions[0]);

@@ -15,6 +15,7 @@ class QueryBuilder {
     this.overbookedQuery = [];
     this.availableItemsQuery = [];
     this.withPendingLoansQuery = [];
+    this.withKeywordQuery = [];
   }
 
   overbooked() {
@@ -32,9 +33,18 @@ class QueryBuilder {
     return this;
   }
 
+  withKeyword(keyword) {
+    this.withKeywordQuery.push(`keywords.name:"${keyword.name}"`);
+    return this;
+  }
+
   qs() {
     return this.overbookedQuery
-      .concat(this.availableItemsQuery, this.withPendingLoansQuery)
+      .concat(
+        this.availableItemsQuery,
+        this.withPendingLoansQuery,
+        this.withKeywordQuery
+      )
       .join(' AND ');
   }
 }
@@ -45,7 +55,8 @@ const queryBuilder = () => {
 
 const list = query => {
   return http.get(`${documentURL}?q=${query}`).then(response => {
-    response.data = response.data.hits.hits.map(hit =>
+    response.data.total = response.data.hits.total;
+    response.data.hits = response.data.hits.hits.map(hit =>
       serializer.fromJSON(hit)
     );
     return response;

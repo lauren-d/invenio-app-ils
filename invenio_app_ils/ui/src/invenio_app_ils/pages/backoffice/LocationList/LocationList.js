@@ -19,7 +19,7 @@ export default class LocationList extends Component {
   }
 
   prepareData(data) {
-    return data.map(row => ({
+    return data.hits.map(row => ({
       ID: row.location_pid,
       Name: row.name,
       Address: row.address,
@@ -54,11 +54,10 @@ export default class LocationList extends Component {
   }
 
   render() {
-    let { data, hasError, isLoading } = this.props;
-    const errorData = hasError ? data : null;
+    let { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>
+        <Error error={error}>
           <Container>
             {this._renderResults(data)}
             <InternalLocationList />
@@ -70,7 +69,7 @@ export default class LocationList extends Component {
 }
 
 LocationList.propTypes = {
-  data: PropTypes.array.isRequired,
+  data: PropTypes.object.isRequired,
   fetchLocations: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
   hasError: PropTypes.bool.isRequired,

@@ -43,8 +43,8 @@ export default class DocumentItems extends Component {
     return <SeeAllButton clickHandler={() => _click()} />;
   };
 
-  prepareData() {
-    return this.props.data.map(row => ({
+  prepareData(data) {
+    return data.hits.map(row => ({
       ID: row.item_pid,
       Updated: this._getFormattedDate(row.updated),
       Barcode: row.barcode,
@@ -55,22 +55,25 @@ export default class DocumentItems extends Component {
     }));
   }
 
-  render() {
-    const rows = this.prepareData();
-    const { data, isLoading, hasError } = this.props;
+  _render_table(data) {
+    const rows = this.prepareData(data);
+    rows.totalHits = data.total;
+    return (
+      <ResultsTable
+        rows={rows}
+        title={'Attached items'}
+        rowActionClickHandler={this._showDetailsHandler}
+        seeAllComponent={this._seeAllButton()}
+        showMaxRows={this.props.showMaxItems}
+      />
+    );
+  }
 
-    const errorData = hasError ? data : null;
+  render() {
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>
-          <ResultsTable
-            rows={rows}
-            title={'Attached items'}
-            rowActionClickHandler={this._showDetailsHandler}
-            seeAllComponent={this._seeAllButton()}
-            showMaxRows={this.props.showMaxItems}
-          />
-        </Error>
+        <Error error={error}>{this._render_table(data)}</Error>
       </Loader>
     );
   }
@@ -79,7 +82,7 @@ export default class DocumentItems extends Component {
 DocumentItems.propTypes = {
   document: PropTypes.object.isRequired,
   fetchDocumentItems: PropTypes.func.isRequired,
-  data: PropTypes.array.isRequired,
+  data: PropTypes.object.isRequired,
   showMaxItems: PropTypes.number,
 };
 

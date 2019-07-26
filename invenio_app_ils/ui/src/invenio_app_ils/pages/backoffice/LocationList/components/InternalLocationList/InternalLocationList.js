@@ -17,7 +17,7 @@ export default class InternalLocationList extends Component {
   }
 
   prepareData(data) {
-    return data.map(row => ({
+    return data.hits.map(row => ({
       ID: row.internal_location_pid,
       Name: row.name,
       'Physical Location': row.physical_location,
@@ -54,18 +54,17 @@ export default class InternalLocationList extends Component {
   }
 
   render() {
-    let { data, hasError, isLoading } = this.props;
-    const errorData = hasError ? data : null;
+    let { data, error, isLoading } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._renderResults(data)}</Error>
+        <Error error={error}>{this._renderResults(data)}</Error>
       </Loader>
     );
   }
 }
 
 InternalLocationList.propTypes = {
-  data: PropTypes.array.isRequired,
+  data: PropTypes.object.isRequired,
   fetchInternalLocations: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
   hasError: PropTypes.bool.isRequired,

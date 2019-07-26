@@ -23,7 +23,8 @@ from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
 from invenio_circulation.search.api import LoansSearch
 from invenio_records_rest.facets import terms_filter
 
-from .indexer import DocumentIndexer, ItemIndexer, LoanIndexer
+from .indexer import DocumentIndexer, ItemIndexer, LoanIndexer, LocationIndexer
+from .jwt import ils_jwt_create_token
 from .records.api import Document, InternalLocation, Item, Location
 from .records.jsonresolver.loan import item_resolver
 
@@ -42,7 +43,6 @@ from .search.api import (  # isort:skip
 )
 
 from invenio_circulation.config import (  # isort:skip
-    CIRCULATION_POLICIES,
     _LOANID_CONVERTER,
 )
 from invenio_circulation.pidstore.pids import (  # isort:skip
@@ -69,7 +69,9 @@ from .circulation.utils import (  # isort:skip
     circulation_items_retriever,
     circulation_patron_exists,
     circulation_build_item_ref,
+    circulation_can_be_requested,
 )
+
 
 from .permissions import (  # isort:skip
     authenticated_user_permission,
@@ -159,6 +161,16 @@ HEADER_TEMPLATE = "invenio_theme/header.html"
 #: Settings base template.
 SETTINGS_TEMPLATE = "invenio_theme/page_settings.html"
 
+# Email templates
+# ===============
+#: Loan status email templates
+LOAN_MAIL_TEMPLATES = {}
+
+# Email message loaders
+# ===============
+#: Loan message loader
+LOAN_MSG_LOADER = "invenio_app_ils.circulation.mail.loader:loan_message_loader"
+
 # Theme configuration
 # ===================
 THEME_FRONTPAGE = False
@@ -169,6 +181,15 @@ THEME_FRONTPAGE = False
 SUPPORT_EMAIL = "info@inveniosoftware.org"
 #: Disable email sending by default.
 MAIL_SUPPRESS_SEND = True
+
+# Notification configuration
+# ==========================
+#: Email address for email notification sender.
+MAIL_NOTIFY_SENDER = "noreply@inveniosoftware.org"
+#: Email CC address(es) for email notifications.
+MAIL_NOTIFY_CC = []
+#: Email BCC address(es) for email notification.
+MAIL_NOTIFY_BCC = []
 
 # Assets
 # ======
@@ -237,7 +258,10 @@ SESSION_COOKIE_SECURE = True
 #: provided, the allowed hosts variable is set to localhost. In production it
 #: should be set to the correct host and it is strongly recommended to only
 #: route correct hosts to the application.
-APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+APP_ALLOWED_HOSTS = [
+    os.environ.get("ALLOWED_HOST"),
+    os.environ.get("HOSTNAME"),  # fix disallowed host error during /ping
+]
 APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {}
 
 # OAI-PMH
@@ -247,8 +271,8 @@ OAISERVER_ID_PREFIX = "oai:invenio_app_ils.org:"
 ###############################################################################
 # Debug
 ###############################################################################
-DEBUG = True
-DEBUG_TB_ENABLED = True
+DEBUG = False
+DEBUG_TB_ENABLED = False
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 
 
@@ -344,6 +368,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher=LOCATION_PID_FETCHER,
         search_class=LocationSearch,
         record_class=Location,
+        indexer_class=LocationIndexer,
         record_loaders={
             "application/json": (
                 "invenio_app_ils.records.loaders:location_loader"
@@ -432,6 +457,9 @@ CIRCULATION_POLICIES = dict(
         from_end_date=True,
         duration_default=circulation_default_extension_duration,
         max_count=circulation_default_extension_max_count
+    ),
+    request=dict(
+        can_be_requested=circulation_can_be_requested
     ),
 )
 
@@ -562,9 +590,22 @@ RECORDS_REST_SORT_OPTIONS = dict(
     ),
 )
 
+
 # RECORDS REST facets
 # =========================
+FACET_KEYWORD_LIMIT = 5
+
 RECORDS_REST_FACETS = dict(
+    documents=dict(  # DocumentSearch.Meta.index
+        aggs=dict(
+            keywords=dict(
+                terms=dict(field="keywords.name", size=FACET_KEYWORD_LIMIT),
+            )
+        ),
+        filters=dict(
+            keywords=terms_filter("keywords.name")
+        )
+    ),
     items=dict(  # ItemSearch.Meta.index
         aggs=dict(
             status=dict(
@@ -713,3 +754,33 @@ ACCOUNTS_REST_UPDATE_USER_PROPERTIES_PERMISSION_FACTORY = backoffice_permission
 
 ACCOUNTS_REST_READ_USERS_LIST_PERMISSION_FACTORY = backoffice_permission
 """Default list users permission factory: reject any request."""
+
+ACCOUNTS_JWT_CREATION_FACTORY = ils_jwt_create_token
+"""ILS Jwt creation factory"""
+
+# Sentry
+# ======
+LOGGING_SENTRY_LEVEL = "WARNING"
+"""Sentry logging level."""
+
+LOGGING_SENTRY_PYWARNINGS = False
+"""Enable logging of Python warnings to Sentry."""
+
+LOGGING_SENTRY_CELERY = False
+"""Configure Celery to send logging to Sentry."""
+
+SENTRY_DSN = None
+"""Set SENTRY_DSN environment variable."""
+
+SENTRY_CONFIG = {
+    "environment": os.environ.get("SENTRY_ENVIRONMENT", "dev")
+}
+
+try:
+    # Try to get the release tag
+    from raven import fetch_git_sha
+    SENTRY_CONFIG["release"] = fetch_git_sha(
+        os.environ.get("DEPLOYMENT_INSTANCE_PATH")
+    )
+except Exception:
+    pass

@@ -13,9 +13,13 @@ import {
   itemPastLoansReducer,
 } from './pages/backoffice/ItemDetails/reducer';
 import { loanDetailsReducer } from './pages/backoffice/LoanDetails/reducer';
-import { userDetailsReducer } from './pages/backoffice/UserDetails/reducer';
-import { patronLoansReducer } from './pages/backoffice/UserDetails/components/PatronLoans/reducer';
-import { userSessionReducer } from './common/components/UserSession/reducer';
+import {
+  itemsSearchByBarcodeReducer,
+  patronCurrentLoansReducer,
+  userDetailsReducer,
+  patronItemCheckoutReducer,
+} from './pages/backoffice/UserDetails/reducer';
+import { patronPendingLoansReducer } from './pages/backoffice/UserDetails/reducer';
 import {
   locationListReducer,
   internalLocationListReducer,
@@ -28,9 +32,11 @@ import {
   idleLoansReducer,
   renewedLoansReducer,
 } from './pages/backoffice/Home/reducer';
+import { notificationsReducer } from './common/components/Notifications/reducer';
+
+import { bookDetailsReducer } from './pages/frontsite/BookDetails/reducer';
 
 const rootReducer = combineReducers({
-  userSession: userSessionReducer,
   documentDetails: documentDetailsReducer,
   documentPendingLoans: documentPendingLoans,
   documentItems: documentItems,
@@ -38,7 +44,8 @@ const rootReducer = combineReducers({
   itemPastLoans: itemPastLoansReducer,
   loanDetails: loanDetailsReducer,
   userDetails: userDetailsReducer,
-  patronLoans: patronLoansReducer,
+  patronPendingLoans: patronPendingLoansReducer,
+  patronCurrentLoans: patronCurrentLoansReducer,
   availableItems: availableItemsReducer,
   locations: locationListReducer,
   internalLocations: internalLocationListReducer,
@@ -48,6 +55,10 @@ const rootReducer = combineReducers({
   overdueLoans: overdueLoansReducer,
   idlePendingLoans: idleLoansReducer,
   latestRenewedLoans: renewedLoansReducer,
+  bookDetails: bookDetailsReducer,
+  itemsSearchInput: itemsSearchByBarcodeReducer,
+  patronItemsCheckout: patronItemCheckoutReducer,
+  notifications: notificationsReducer,
 });
 
 const composeEnhancers = composeWithDevTools({

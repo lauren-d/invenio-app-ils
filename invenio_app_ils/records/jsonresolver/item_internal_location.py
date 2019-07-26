@@ -24,14 +24,10 @@ def jsonresolver_loader(url_map):
 
     def get_internal_location(internal_location_pid):
         """Return the Internal Location record."""
-        internal_location = {}
-        try:
-            internal_location = InternalLocation.get_record_by_pid(
-                internal_location_pid
-            )
-        except PersistentIdentifierError as ex:
-            current_app.logger.error(ex)
-            raise ex
+        internal_location = InternalLocation.get_record_by_pid(
+            internal_location_pid
+        )
+        del internal_location["$schema"]
 
         return internal_location
 

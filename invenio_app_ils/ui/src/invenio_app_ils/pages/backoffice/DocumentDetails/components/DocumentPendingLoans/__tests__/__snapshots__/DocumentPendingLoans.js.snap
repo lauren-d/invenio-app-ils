@@ -2,9 +2,7 @@
 
 exports[`DocumentPendingLoans tests should load the details component 1`] = `
 <Loader>
-  <Error
-    error={null}
-  >
+  <Error>
     <ResultsTable
       fixed={false}
       headerActionClickHandler={null}
@@ -30,24 +28,27 @@ exports[`DocumentPendingLoans tests should load the details component 1`] = `
 exports[`DocumentPendingLoans tests should render pending loans 1`] = `
 <DocumentPendingLoans
   data={
-    Array [
-      Object {
-        "created": "2018-01-01T10:05:00.000Z",
-        "end_date": "2018-01-01T10:05:00.000Z",
-        "loan_pid": "loan1",
-        "patron_pid": "patron_1",
-        "start_date": "2018-01-01T10:05:00.000Z",
-        "updated": "2018-01-01T10:05:00.000Z",
-      },
-      Object {
-        "created": "2018-01-01T10:05:00.000Z",
-        "end_date": "2018-01-01T10:05:00.000Z",
-        "loan_pid": "loan2",
-        "patron_pid": "patron_2",
-        "start_date": "2018-01-01T10:05:00.000Z",
-        "updated": "2018-01-01T10:05:00.000Z",
-      },
-    ]
+    Object {
+      "hits": Array [
+        Object {
+          "created": "2018-01-01T10:05:00.000Z",
+          "end_date": "2018-01-01T10:05:00.000Z",
+          "loan_pid": "loan1",
+          "patron_pid": "patron_1",
+          "start_date": "2018-01-01T10:05:00.000Z",
+          "updated": "2018-01-01T10:05:00.000Z",
+        },
+        Object {
+          "created": "2018-01-01T10:05:00.000Z",
+          "end_date": "2018-01-01T10:05:00.000Z",
+          "loan_pid": "loan2",
+          "patron_pid": "patron_2",
+          "start_date": "2018-01-01T10:05:00.000Z",
+          "updated": "2018-01-01T10:05:00.000Z",
+        },
+      ],
+      "total": 2,
+    }
   }
   document={
     Object {
@@ -62,9 +63,7 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
   showMaxPendingLoans={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
@@ -512,7 +511,12 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
 
 exports[`DocumentPendingLoans tests should render show a message with no pending loans 1`] = `
 <DocumentPendingLoans
-  data={Array []}
+  data={
+    Object {
+      "hits": Array [],
+      "total": 0,
+    }
+  }
   document={
     Object {
       "metadata": Object {
@@ -526,9 +530,7 @@ exports[`DocumentPendingLoans tests should render show a message with no pending
   showMaxPendingLoans={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
@@ -619,24 +621,27 @@ exports[`DocumentPendingLoans tests should render show a message with no pending
 exports[`DocumentPendingLoans tests should render the see all button when showing only a few pending loans 1`] = `
 <DocumentPendingLoans
   data={
-    Array [
-      Object {
-        "created": "2018-01-01T10:05:00.000Z",
-        "end_date": "2018-01-01T10:05:00.000Z",
-        "loan_pid": "loan1",
-        "patron_pid": "patron_1",
-        "start_date": "2018-01-01T10:05:00.000Z",
-        "updated": "2018-01-01T10:05:00.000Z",
-      },
-      Object {
-        "created": "2018-01-01T10:05:00.000Z",
-        "end_date": "2018-01-01T10:05:00.000Z",
-        "loan_pid": "loan2",
-        "patron_pid": "patron_2",
-        "start_date": "2018-01-01T10:05:00.000Z",
-        "updated": "2018-01-01T10:05:00.000Z",
-      },
-    ]
+    Object {
+      "hits": Array [
+        Object {
+          "created": "2018-01-01T10:05:00.000Z",
+          "end_date": "2018-01-01T10:05:00.000Z",
+          "loan_pid": "loan1",
+          "patron_pid": "patron_1",
+          "start_date": "2018-01-01T10:05:00.000Z",
+          "updated": "2018-01-01T10:05:00.000Z",
+        },
+        Object {
+          "created": "2018-01-01T10:05:00.000Z",
+          "end_date": "2018-01-01T10:05:00.000Z",
+          "loan_pid": "loan2",
+          "patron_pid": "patron_2",
+          "start_date": "2018-01-01T10:05:00.000Z",
+          "updated": "2018-01-01T10:05:00.000Z",
+        },
+      ],
+      "total": 2,
+    }
   }
   document={
     Object {
@@ -651,9 +656,7 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
   showMaxPendingLoans={1}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}

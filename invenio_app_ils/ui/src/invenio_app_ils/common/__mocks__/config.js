@@ -6,6 +6,7 @@ export const invenioConfig = {
         onEmptyQuery: '',
       },
       sortOrder: [],
+      aggs: [],
     },
   },
   items: {
@@ -32,7 +33,7 @@ export const invenioConfig = {
     },
   },
   circulation: {
-    loanActiveStates: [],
+    loanActiveStates: ['ITEM_ON_LOAN'],
     loanCompletedStates: [],
   },
 };

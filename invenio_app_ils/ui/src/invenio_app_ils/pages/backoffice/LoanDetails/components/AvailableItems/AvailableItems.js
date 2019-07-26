@@ -71,13 +71,12 @@ export default class AvailableItems extends Component {
   };
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>
+        <Error error={error}>
           <Header as="h3">Available items</Header>
-          {this._renderAvailableItemsOrEmpty(data)}
+          {this._renderAvailableItemsOrEmpty(data.hits)}
         </Error>
       </Loader>
     );
@@ -86,7 +85,7 @@ export default class AvailableItems extends Component {
 
 AvailableItems.propTypes = {
   assignItemToLoan: PropTypes.func.isRequired,
-  data: PropTypes.array.isRequired,
+  data: PropTypes.object.isRequired,
   loan: PropTypes.object.isRequired,
   fetchAvailableItems: PropTypes.func.isRequired,
   showMaxAvailableItems: PropTypes.number,
