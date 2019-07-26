@@ -176,14 +176,14 @@ THEME_FRONTPAGE = False
 # Email configuration
 # ===================
 #: Email address for support.
-SUPPORT_EMAIL = "info@inveniosoftware.org"
+SUPPORT_EMAIL = "bibsys@uclouvain.be"
 #: Disable email sending by default.
 MAIL_SUPPRESS_SEND = True
 
 # Notification configuration
 # ==========================
 #: Email address for email notification sender.
-MAIL_NOTIFY_SENDER = "noreply@inveniosoftware.org"
+MAIL_NOTIFY_SENDER = "noreply@uclouvain.be"
 #: Email CC address(es) for email notifications.
 MAIL_NOTIFY_CC = []
 #: Email BCC address(es) for email notification.
@@ -256,7 +256,7 @@ SESSION_COOKIE_SECURE = True
 #: provided, the allowed hosts variable is set to localhost. In production it
 #: should be set to the correct host and it is strongly recommended to only
 #: route correct hosts to the application.
-APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+APP_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "ils.invenio.apps.bib.ucl.ac.be"]
 APP_DEFAULT_SECURE_HEADERS["content_security_policy"] = {}
 
 # OAI-PMH
@@ -266,8 +266,8 @@ OAISERVER_ID_PREFIX = "oai:invenio_app_ils.org:"
 ###############################################################################
 # Debug
 ###############################################################################
-DEBUG = True
-DEBUG_TB_ENABLED = True
+DEBUG = False
+DEBUG_TB_ENABLED = False
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 
 
