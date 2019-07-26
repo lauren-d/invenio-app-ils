@@ -3,10 +3,13 @@ import React from 'react';
 import { ResultsTable } from '../ResultsTable';
 import { Settings } from 'luxon';
 import { Button } from 'semantic-ui-react';
+import history from '../../../../history';
+import { invenioConfig } from '../../../config';
+import { invenioConfig as configMock } from '../../../__mocks__/config';
 
 Settings.defaultZoneName = 'utc';
 
-const d = '2018-01-01';
+const stringDate = '2018-01-01';
 
 describe('ResultsTable tests', () => {
   let component;
@@ -19,11 +22,7 @@ describe('ResultsTable tests', () => {
 
   it('should load the ResultTable component', () => {
     const component = shallow(
-      <ResultsTable
-        history={() => {}}
-        rows={[]}
-        rowActionClickHandler={() => {}}
-      />
+      <ResultsTable rows={[]} rowActionClickHandler={() => {}} />
     );
     expect(component).toMatchSnapshot();
   });
@@ -34,17 +33,17 @@ describe('ResultsTable tests', () => {
         loan_pid: 'loan1',
         ID: '1',
         patron_pid: 'patron_1',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
       {
         loan_pid: 'loan2',
         ID: '2',
         patron_pid: 'patron_2',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
     ];
 
@@ -58,7 +57,6 @@ describe('ResultsTable tests', () => {
 
     component = mount(
       <ResultsTable
-        history={() => {}}
         rows={data}
         seeAllComponent={button()}
         rowActionClickHandler={() => {}}
@@ -80,22 +78,21 @@ describe('ResultsTable tests', () => {
       {
         ID: 'loan1',
         patron_pid: 'patron_1',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
       {
         ID: 'loan2',
         patron_pid: 'patron_2',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
     ];
 
     component = mount(
       <ResultsTable
-        history={() => {}}
         rows={data}
         rowActionClickHandler={() => {}}
         showMaxRows={3}
@@ -116,16 +113,16 @@ describe('ResultsTable tests', () => {
       {
         ID: 'loan1',
         patron_pid: 'patron_1',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
       {
         ID: 'loan2',
         patron_pid: 'patron_2',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
     ];
 
@@ -138,40 +135,32 @@ describe('ResultsTable tests', () => {
       .filterWhere(element => element.prop('data-test') === firstId)
       .find('button');
     button.simulate('click');
-    expect(mockedClickHandler).toHaveBeenCalledWith(firstId);
+    expect(mockedClickHandler).toHaveBeenCalledWith(results[0]);
   });
 
   it('should call see all click handler on see all click', () => {
     const mockedHistoryPush = jest.fn();
-    const historyFn = {
-      push: mockedHistoryPush,
-    };
-
+    history.push = mockedHistoryPush;
     const results = [
       {
         ID: 'loan1',
         patron_pid: 'patron_1',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
       {
         ID: 'loan2',
         patron_pid: 'patron_2',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
     ];
 
     const buttonObj = () => {
       return (
-        <Button
-          size="small"
-          onClick={() => {
-            mockedHistoryPush();
-          }}
-        >
+        <Button size="small" onClick={() => mockedHistoryPush()}>
           See all
         </Button>
       );
@@ -181,7 +170,6 @@ describe('ResultsTable tests', () => {
       <ResultsTable
         rows={results}
         showMaxRows={1}
-        history={historyFn}
         seeAllComponent={buttonObj()}
         rowActionClickHandler={() => {}}
       />
@@ -193,27 +181,18 @@ describe('ResultsTable tests', () => {
   });
 
   it('should show the view details button when the rowActionClickHandler prop is defined', () => {
-    const mockedHistoryPush = jest.fn();
-    const historyFn = {
-      push: mockedHistoryPush,
-    };
-
     const results = [
       {
         ID: 'loan1',
         patron_pid: 'patron_1',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
     ];
 
     component = mount(
-      <ResultsTable
-        rows={results}
-        history={historyFn}
-        rowActionClickHandler={() => {}}
-      />
+      <ResultsTable rows={results} rowActionClickHandler={() => {}} />
     );
 
     const firstId = results[0].ID;
@@ -227,22 +206,17 @@ describe('ResultsTable tests', () => {
   });
 
   it('should not show the view details button when the rowActionClickHandler prop is not defined', () => {
-    const mockedHistoryPush = jest.fn();
-    const historyFn = {
-      push: mockedHistoryPush,
-    };
-
     const results = [
       {
         ID: 'loan1',
         patron_pid: 'patron_1',
-        updated: d,
-        start_date: d,
-        end_date: d,
+        updated: stringDate,
+        start_date: stringDate,
+        end_date: stringDate,
       },
     ];
 
-    component = mount(<ResultsTable rows={results} history={historyFn} />);
+    component = mount(<ResultsTable rows={results} />);
 
     const firstId = results[0].ID;
     const button = component

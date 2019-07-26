@@ -1,18 +1,20 @@
 import React from 'react';
+import omit from 'lodash/omit';
 import { mount } from 'enzyme';
 import { Settings } from 'luxon';
 import { fromISO, toISO } from '../../../../common/api/date';
 import { ResultsList } from '../components';
+import { formatter } from '../../../../common/components/ResultsTable/formatters';
 
 Settings.defaultZoneName = 'utc';
 
 describe('ItemsSearch ResultsList tests', () => {
-  const d = fromISO('2018-01-01T11:05:00+01:00');
+  const stringDate = fromISO('2018-01-01T11:05:00+01:00');
 
   const results = [
     {
       id: 987,
-      created: toISO(d),
+      created: toISO(stringDate),
       metadata: {
         item_pid: 987,
         barcode: '9865745223',
@@ -81,6 +83,10 @@ describe('ItemsSearch ResultsList tests', () => {
       .filterWhere(element => element.prop('data-test') === firstId)
       .find('button');
     button.simulate('click');
-    expect(mockedClickHandler).toHaveBeenCalledWith(firstId);
+    const expected = omit(formatter.item.toTable(results[0]), [
+      'Created',
+      'Updated',
+    ]);
+    expect(mockedClickHandler).toHaveBeenCalledWith(expected);
   });
 });

@@ -2,13 +2,13 @@
 
 exports[`OverdueLoansList tests should load the details component 1`] = `
 <Loader>
-  <Error
-    error={null}
-  >
+  <Error>
     <ResultsTable
       fixed={false}
       headerActionClickHandler={null}
       headerActionComponent={null}
+      name="overdue loans"
+      renderSegment={true}
       rowActionClickHandler={[Function]}
       rows={Array []}
       seeAllComponent={
@@ -34,18 +34,28 @@ exports[`OverdueLoansList tests should render loans 1`] = `
       "hits": Array [
         Object {
           "created": "2018-01-01T10:05:00.000Z",
-          "end_date": "2018-01-01T10:05:00.000Z",
+          "id": 1,
           "loan_pid": "loan1",
-          "patron_pid": "patron_1",
-          "start_date": "2018-01-01T10:05:00.000Z",
+          "metadata": Object {
+            "document_pid": "doc1",
+            "end_date": "2018-01-01T10:05:00.000Z",
+            "loan_pid": "loan1",
+            "patron_pid": "patron_1",
+            "start_date": "2018-01-01T10:05:00.000Z",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
         Object {
           "created": "2018-01-01T10:05:00.000Z",
-          "end_date": "2018-01-01T10:05:00.000Z",
+          "id": 2,
           "loan_pid": "loan2",
-          "patron_pid": "patron_2",
-          "start_date": "2018-01-01T10:05:00.000Z",
+          "metadata": Object {
+            "document_pid": "doc1",
+            "end_date": "2018-01-01T10:05:00.000Z",
+            "loan_pid": "loan2",
+            "patron_pid": "patron_2",
+            "start_date": "2018-01-01T10:05:00.000Z",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
       ],
@@ -53,31 +63,30 @@ exports[`OverdueLoansList tests should render loans 1`] = `
     }
   }
   fetchOverdueLoans={[Function]}
-  history={[Function]}
   showMaxEntries={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="overdue loans"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={
           Array [
             Object {
-              "Expiration date": undefined,
+              "End date": "2018-01-01",
               "ID": "loan1",
+              "Item barcode": null,
               "Patron ID": "patron_1",
-              "State": undefined,
             },
             Object {
-              "Expiration date": undefined,
+              "End date": "2018-01-01",
               "ID": "loan2",
+              "Item barcode": null,
               "Patron ID": "patron_2",
-              "State": undefined,
             },
           ]
         }
@@ -159,8 +168,8 @@ exports[`OverdueLoansList tests should render loans 1`] = `
                     Array [
                       "ID",
                       "Patron ID",
-                      "State",
-                      "Expiration date",
+                      "Item barcode",
+                      "End date",
                     ]
                   }
                   withRowAction={true}
@@ -230,7 +239,7 @@ exports[`OverdueLoansList tests should render loans 1`] = `
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="State"
+                            key="Item barcode"
                           >
                             <TableCell
                               as="th"
@@ -239,13 +248,13 @@ exports[`OverdueLoansList tests should render loans 1`] = `
                               <th
                                 className=""
                               >
-                                State
+                                Item barcode
                               </th>
                             </TableCell>
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="Expiration date"
+                            key="End date"
                           >
                             <TableCell
                               as="th"
@@ -254,7 +263,7 @@ exports[`OverdueLoansList tests should render loans 1`] = `
                               <th
                                 className=""
                               >
-                                Expiration date
+                                End date
                               </th>
                             </TableCell>
                           </TableHeaderCell>
@@ -268,24 +277,24 @@ exports[`OverdueLoansList tests should render loans 1`] = `
                     Array [
                       "ID",
                       "Patron ID",
-                      "State",
-                      "Expiration date",
+                      "Item barcode",
+                      "End date",
                     ]
                   }
                   rowActionClickHandler={[Function]}
                   rows={
                     Array [
                       Object {
-                        "Expiration date": undefined,
+                        "End date": "2018-01-01",
                         "ID": "loan1",
+                        "Item barcode": null,
                         "Patron ID": "patron_1",
-                        "State": undefined,
                       },
                       Object {
-                        "Expiration date": undefined,
+                        "End date": "2018-01-01",
                         "ID": "loan2",
+                        "Item barcode": null,
                         "Patron ID": "patron_2",
-                        "State": undefined,
                       },
                     ]
                   }
@@ -365,26 +374,26 @@ exports[`OverdueLoansList tests should render loans 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="State-loan1"
+                            data-test="Item barcode-loan1"
                             key="2-loan1"
                           >
                             <td
                               className=""
-                              data-test="State-loan1"
+                              data-test="Item barcode-loan1"
                             >
                               -
                             </td>
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Expiration date-loan1"
+                            data-test="End date-loan1"
                             key="3-loan1"
                           >
                             <td
                               className=""
-                              data-test="Expiration date-loan1"
+                              data-test="End date-loan1"
                             >
-                              -
+                              2018-01-01
                             </td>
                           </TableCell>
                         </tr>
@@ -458,26 +467,26 @@ exports[`OverdueLoansList tests should render loans 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="State-loan2"
+                            data-test="Item barcode-loan2"
                             key="2-loan2"
                           >
                             <td
                               className=""
-                              data-test="State-loan2"
+                              data-test="Item barcode-loan2"
                             >
                               -
                             </td>
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Expiration date-loan2"
+                            data-test="End date-loan2"
                             key="3-loan2"
                           >
                             <td
                               className=""
-                              data-test="Expiration date-loan2"
+                              data-test="End date-loan2"
                             >
-                              -
+                              2018-01-01
                             </td>
                           </TableCell>
                         </tr>
@@ -516,17 +525,16 @@ exports[`OverdueLoansList tests should render show a message with no loans 1`] =
     }
   }
   fetchOverdueLoans={[Function]}
-  history={[Function]}
   showMaxEntries={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="overdue loans"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={Array []}
         seeAllComponent={
@@ -602,6 +610,8 @@ exports[`OverdueLoansList tests should render show a message with no loans 1`] =
                 data-test="no-results"
               >
                 There are no 
+                overdue loans
+                .
               </div>
             </Message>
           </div>

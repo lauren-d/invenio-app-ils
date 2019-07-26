@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
-import { BackOfficeURLS } from './common/urls';
-import {
-  FrontSite as FrontSiteRoutes,
-  BackOffice as BackOfficeRoutes,
-} from './routes';
+import { FrontSite, BackOffice } from './routes/components';
+import { BackOfficeRoutes } from './routes/urls';
 import history from './history';
 import { NotFound } from './common/components';
 import { AuthenticationGuard, UnAuthorized } from './authentication/components';
@@ -14,13 +11,13 @@ export default class App extends Component {
     return (
       <Router history={history}>
         <Switch>
-          <Route exact path="/" component={FrontSiteRoutes} />
           <AuthenticationGuard
-            path={`${BackOfficeURLS.home}`}
-            authorizedComponent={BackOfficeRoutes}
+            path={`${BackOfficeRoutes.home}`}
+            authorizedComponent={BackOffice}
             unAuthorizedComponent={UnAuthorized}
             roles={['admin', 'librarian']}
           />
+          <FrontSite />
           <Route component={NotFound} />
         </Switch>
       </Router>

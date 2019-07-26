@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { generatePath } from 'react-router';
 import { Container, Grid, Segment, Icon, Header } from 'semantic-ui-react';
 import {
   ReactSearchKit,
@@ -16,18 +15,18 @@ import {
   Aggregator,
 } from 'react-searchkit';
 import { apiConfig } from '../../../common/api/base';
-import { BackOfficeURLS } from '../../../common/urls';
 import { Error as IlsError } from '../../../common/components';
 import { item as itemApi } from '../../../common/api';
 import { ClearButton, NewButton } from '../components/buttons';
-import { openRecordEditor } from '../../../common/urls';
+import { BackOfficeRoutes, openRecordEditor } from '../../../routes/urls';
 import { SearchBar as ItemsSearchBar } from '../../../common/components';
 import { ResultsList as ItemsResultsList } from './components';
 import { default as config } from './config';
+import { goTo } from '../../../history';
 import './ItemsSearch.scss';
 
 export class ItemsSearch extends Component {
-  _renderSearchBar = (_, queryString, onInputChange, executeSearch) => {
+  renderSearchBar = (_, queryString, onInputChange, executeSearch) => {
     return (
       <ItemsSearchBar
         currentQueryString={queryString}
@@ -38,23 +37,20 @@ export class ItemsSearch extends Component {
     );
   };
 
-  _renderResultsList = results => {
+  renderResultsList = results => {
     return (
       <div className="results-list">
         <ItemsResultsList
           results={results}
-          viewDetailsClickHandler={itemPid => {
-            const path = generatePath(BackOfficeURLS.itemDetails, {
-              itemPid: itemPid,
-            });
-            this.props.history.push(path);
+          viewDetailsClickHandler={row => {
+            goTo(BackOfficeRoutes.itemDetailsFor(row.ID));
           }}
         />
       </div>
     );
   };
 
-  _renderEmptyResults = (queryString, resetQuery) => {
+  renderEmptyResults = (queryString, resetQuery) => {
     return (
       <Segment placeholder textAlign="center">
         <Header icon>
@@ -81,19 +77,19 @@ export class ItemsSearch extends Component {
     );
   };
 
-  _renderError = error => {
+  renderError = error => {
     return <IlsError error={error} />;
   };
 
-  _renderPagination = () => {
+  renderPagination = () => {
     return <Pagination />;
   };
 
-  _renderCount = totalResults => {
+  renderCount = totalResults => {
     return <div>{totalResults} results</div>;
   };
 
-  _renderResultsSorting = () => {
+  renderResultsSorting = () => {
     return config.SORT_BY.length ? (
       <div className="sorting">
         <span className="before">Show</span>
@@ -115,7 +111,7 @@ export class ItemsSearch extends Component {
     ) : null;
   };
 
-  _renderAggregations = () => {
+  renderAggregations = () => {
     const components = config.AGGREGATIONS.map(agg => (
       <div className="aggregator" key={agg.field}>
         <Aggregator title={agg.title} field={agg.field} />
@@ -124,25 +120,25 @@ export class ItemsSearch extends Component {
     return <div className="aggregators">{components}</div>;
   };
 
-  _renderHeader = () => {
+  renderHeader = () => {
     return (
       <Grid columns={3} verticalAlign="middle" stackable relaxed>
         <Grid.Column width={5} textAlign="left">
-          <Count renderElement={this._renderCount} />
+          <Count renderElement={this.renderCount} />
         </Grid.Column>
-        <Grid.Column width={6}>{this._renderPagination()}</Grid.Column>
+        <Grid.Column width={6}>{this.renderPagination()}</Grid.Column>
         <Grid.Column width={5} textAlign="right">
-          {this._renderResultsSorting()}
+          {this.renderResultsSorting()}
         </Grid.Column>
       </Grid>
     );
   };
 
-  _renderFooter = () => {
+  renderFooter = () => {
     return (
       <Grid columns={3} verticalAlign="middle" stackable relaxed>
         <Grid.Column width={5} />
-        <Grid.Column width={6}>{this._renderPagination()}</Grid.Column>
+        <Grid.Column width={6}>{this.renderPagination()}</Grid.Column>
         <Grid.Column width={5} />
       </Grid>
     );
@@ -157,18 +153,18 @@ export class ItemsSearch extends Component {
         }}
       >
         <Container className="items-search-searchbar">
-          <SearchBar renderElement={this._renderSearchBar} />
+          <SearchBar renderElement={this.renderSearchBar} />
         </Container>
 
         <Grid columns={2} stackable relaxed className="items-search-container">
-          <Grid.Column width={3}>{this._renderAggregations()}</Grid.Column>
+          <Grid.Column width={3}>{this.renderAggregations()}</Grid.Column>
           <Grid.Column width={13}>
             <ResultsLoader>
-              <EmptyResults renderElement={this._renderEmptyResults} />
-              <Error renderElement={this._renderError} />
-              {this._renderHeader()}
-              <ResultsList renderElement={this._renderResultsList} />
-              {this._renderFooter()}
+              <EmptyResults renderElement={this.renderEmptyResults} />
+              <Error renderElement={this.renderError} />
+              {this.renderHeader()}
+              <ResultsList renderElement={this.renderResultsList} />
+              {this.renderFooter()}
             </ResultsLoader>
           </Grid.Column>
         </Grid>

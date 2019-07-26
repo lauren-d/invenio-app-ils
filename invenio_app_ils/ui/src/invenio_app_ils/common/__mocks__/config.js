@@ -6,6 +6,17 @@ export const invenioConfig = {
         onEmptyQuery: '',
       },
       sortOrder: [],
+      aggs: [],
+    },
+  },
+  eitems: {
+    search: {
+      sortBy: {
+        values: [],
+        onEmptyQuery: '',
+      },
+      sortOrder: [],
+      aggs: [],
     },
   },
   items: {
@@ -18,7 +29,7 @@ export const invenioConfig = {
       aggs: [],
     },
     available: {
-      status: 'LOANABLE',
+      status: 'CAN_CIRCULATE',
     },
   },
   loans: {
@@ -33,6 +44,43 @@ export const invenioConfig = {
   },
   circulation: {
     loanActiveStates: ['ITEM_ON_LOAN'],
-    loanCompletedStates: [],
+    loanCompletedStates: ['ITEM_RETURNED'],
   },
+  series: {
+    search: {
+      sortBy: {
+        values: [],
+        onEmptyQuery: '',
+      },
+      sortOrder: [],
+      aggs: [],
+    },
+  },
+  patrons: {
+    search: {
+      sortBy: {
+        values: [],
+        onEmptyQuery: '',
+      },
+      sortOrder: [],
+      aggs: [],
+    },
+  },
+  relationTypes: [
+    {
+      id: 0,
+      name: 'language',
+      label: 'Language',
+    },
+    {
+      id: 1,
+      name: 'edition',
+      label: 'Edition',
+    },
+    {
+      id: 2,
+      name: 'other',
+      label: 'Other',
+    },
+  ],
 };

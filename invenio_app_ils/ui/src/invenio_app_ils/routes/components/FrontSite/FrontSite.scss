@@ -1,0 +1,13 @@
+$header-height: 80px;
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  margin-top: $header-height;
+  justify-content: space-between;
+}

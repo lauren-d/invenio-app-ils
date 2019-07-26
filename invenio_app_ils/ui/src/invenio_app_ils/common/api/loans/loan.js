@@ -2,12 +2,11 @@ import { http } from '../base';
 import { toISO, toShortDate } from '../date';
 import { DateTime } from 'luxon';
 import { serializer } from './serializer';
-import _isEmpty from 'lodash/isEmpty';
+import isEmpty from 'lodash/isEmpty';
 import { prepareDateQuery, prepareSumQuery } from '../utils';
 import { ApiURLS } from '../urls';
 import { generatePath } from 'react-router-dom';
 
-const loanListURL = ApiURLS.loans.list;
 const loanURL = loanPid => {
   return generatePath(ApiURLS.loans.loan, { loanPid: loanPid });
 };
@@ -20,30 +19,57 @@ const get = loanPid =>
 
 const getLoanReplaceItemUrl = loanPid => `${loanURL(loanPid)}/replace-item`;
 
+const requestLoanOnDocument = (
+  url,
+  docPid,
+  patronPid,
+  transactionUserPid,
+  transactionLocationPid,
+  params = {}
+) => {
+  const now = DateTime.local();
+  const payload = {
+    document_pid: docPid,
+    patron_pid: patronPid,
+    transaction_user_pid: transactionUserPid,
+    transaction_location_pid: transactionLocationPid,
+    transaction_date: toISO(now),
+    ...params,
+  };
+
+  return http.post(url, payload).then(response => {
+    response.data = serializer.fromJSON(response.data);
+    return response;
+  });
+};
+
 const postAction = (
   url,
   pid,
   loan,
   transactionUserPid,
-  transactionLocationPid
+  transactionLocationPid,
+  params = {}
 ) => {
+  if (
+    !loan.metadata.hasOwnProperty('item_pid') ||
+    !loan.metadata.hasOwnProperty('document_pid')
+  ) {
+    throw new Error(
+      `No 'item_pid' and 'document_pid' attached to loan '${pid}'`
+    );
+  }
   const now = DateTime.local();
   const payload = {
     transaction_user_pid: transactionUserPid,
-    patron_pid: loan.patron_pid,
+    patron_pid: loan.metadata.patron_pid,
+    document_pid: loan.metadata.document_pid,
+    item_pid: loan.metadata.item_pid,
     transaction_location_pid: transactionLocationPid,
     transaction_date: toISO(now),
+    ...params,
   };
 
-  if ('item_pid' in loan) {
-    payload['item_pid'] = loan.item_pid;
-  } else if ('document_pid' in loan) {
-    payload['document_pid'] = loan.document_pid;
-  } else {
-    throw new Error(
-      `No 'item_pid' or 'document_pid' attached to loan '${pid}'`
-    );
-  }
   return http.post(url, payload).then(response => {
     response.data = serializer.fromJSON(response.data);
     return response;
@@ -61,20 +87,22 @@ const assignItemToLoan = (itemPid, loanPid) => {
 
 class QueryBuilder {
   constructor() {
-    this.sortBy = '';
     this.documentQuery = [];
     this.itemQuery = [];
-    this.patronQuery = [];
-    this.stateQuery = [];
     this.overdueQuery = [];
-    this.updatedQuery = [];
+    this.patronQuery = [];
     this.renewedCountQuery = [];
+    this.size = '';
+    this.sortBy = '';
+    this.startDateQuery = [];
+    this.stateQuery = [];
+    this.updatedQuery = [];
   }
 
   withDocPid(documentPid) {
     if (
       !documentPid ||
-      (typeof documentPid != 'number' && _isEmpty(documentPid))
+      (typeof documentPid != 'number' && isEmpty(documentPid))
     ) {
       throw TypeError('DocumentPid argument missing');
     }
@@ -83,7 +111,7 @@ class QueryBuilder {
   }
 
   withItemPid(itemPid) {
-    if (!itemPid || (typeof itemPid != 'number' && _isEmpty(itemPid))) {
+    if (!itemPid || (typeof itemPid != 'number' && isEmpty(itemPid))) {
       throw TypeError('itemPid argument missing');
     }
     this.itemQuery.push(`item_pid:${prepareSumQuery(itemPid)}`);
@@ -91,7 +119,7 @@ class QueryBuilder {
   }
 
   withPatronPid(patronPid) {
-    if (!patronPid || (typeof patronPid != 'number' && _isEmpty(patronPid))) {
+    if (!patronPid || (typeof patronPid != 'number' && isEmpty(patronPid))) {
       throw TypeError('patronPid argument missing');
     }
     this.patronQuery.push(`patron_pid:${prepareSumQuery(patronPid)}`);
@@ -99,7 +127,7 @@ class QueryBuilder {
   }
 
   withState(state) {
-    if (!state || _isEmpty(state)) {
+    if (!state || isEmpty(state)) {
       throw TypeError('state argument missing');
     }
     this.stateQuery.push(`state:${prepareSumQuery(state)}`);
@@ -119,6 +147,14 @@ class QueryBuilder {
     return this;
   }
 
+  withStartDate({ fromDate, toDate }) {
+    if (fromDate || toDate)
+      this.startDateQuery.push(
+        prepareDateQuery('start_date', null, fromDate, toDate)
+      );
+    return this;
+  }
+
   /**
    * Combine elasticsearch query for number of renewals
    * @param renewals string, number or array
@@ -128,12 +164,17 @@ class QueryBuilder {
   withRenewedCount(renewals) {
     if (
       !renewals ||
-      _isEmpty(renewals) ||
+      isEmpty(renewals) ||
       !(typeof renewals === 'number' || typeof renewals === 'string')
     ) {
       throw TypeError('Renewal argument missing or invalid type');
     }
     this.renewedCountQuery.push(`extension_count:${renewals}`);
+    return this;
+  }
+
+  withSize(size) {
+    if (size > 0) this.size = `&size=${size}`;
     return this;
   }
 
@@ -150,10 +191,11 @@ class QueryBuilder {
         this.stateQuery,
         this.overdueQuery,
         this.updatedQuery,
-        this.renewedCountQuery
+        this.renewedCountQuery,
+        this.startDateQuery
       )
       .join(' AND ');
-    return `(${searchCriteria})${this.sortBy}`;
+    return `(${searchCriteria})${this.sortBy}${this.size}`;
   }
 }
 
@@ -162,7 +204,7 @@ const queryBuilder = () => {
 };
 
 const list = query => {
-  return http.get(`${loanListURL}?q=${query}`).then(response => {
+  return http.get(`${ApiURLS.loans.list}?q=${query}`).then(response => {
     response.data.total = response.data.hits.total;
     response.data.hits = response.data.hits.hits.map(hit =>
       serializer.fromJSON(hit)
@@ -172,7 +214,7 @@ const list = query => {
 };
 
 const count = query => {
-  return http.get(`${loanListURL}?q=${query}`).then(response => {
+  return http.get(`${ApiURLS.loans.list}?q=${query}`).then(response => {
     response.data = response.data.hits.total;
     return response;
   });
@@ -185,6 +227,7 @@ export const loan = {
   get: get,
   count: count,
   postAction: postAction,
+  requestLoanOnDocument: requestLoanOnDocument,
   serializer: serializer,
-  url: loanListURL,
+  url: ApiURLS.loans.list,
 };

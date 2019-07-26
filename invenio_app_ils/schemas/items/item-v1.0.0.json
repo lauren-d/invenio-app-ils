@@ -64,7 +64,11 @@
     },
     "description": {
       "type": "string",
-      "title": "Any extra description for this Item"
+      "title": "Any extra description for this ItItemem"
+    },
+    "_internal_notes": {
+      "type": "string",
+      "title": "Any extra description for this Item reserved for library usage"
     },
     "circulation_restriction": {
       "type": "string",
@@ -78,7 +82,7 @@
     },
     "status": {
       "type": "string",
-      "enum": ["LOANABLE", "MISSING", "IN_BINDING", "SCANNING"],
+      "enum": ["CAN_CIRCULATE", "MISSING", "IN_BINDING", "SCANNING"],
       "title": "The current status of this Item"
     },
     "circulation_status": {

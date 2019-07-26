@@ -1,84 +1,121 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Message, Header, Table, Button } from 'semantic-ui-react';
-import { Loader, Error } from '../../../../../common/components';
+import { Button } from 'semantic-ui-react';
+import { Loader, Error, ResultsTable } from '../../../../../common/components';
 import './AvailableItems.scss';
+import { formatter } from '../../../../../common/components/ResultsTable/formatters';
+import { item as itemApi } from '../../../../../common/api';
+import { SeeAllButton } from '../../../components/buttons/SeeAllButton';
+import { goTo, goToHandler } from '../../../../../history';
+import { BackOfficeRoutes } from '../../../../../routes/urls';
+import pick from 'lodash/pick';
 
 export default class AvailableItems extends Component {
   constructor(props) {
     super(props);
     this.fetchAvailableItems = props.fetchAvailableItems;
     this.assignItemToLoan = props.assignItemToLoan;
+    this.assignItemAndCheckout = props.assignItemAndCheckout;
+    this.showDetailsUrl = BackOfficeRoutes.itemDetailsFor;
+    this.seeAllUrl = BackOfficeRoutes.itemsListWithQuery;
   }
 
   componentDidMount() {
-    const { document_pid } = this.props.loan;
-    this.fetchAvailableItems(document_pid);
+    this.fetchAvailableItems(this.props.loan.metadata.document_pid);
   }
 
-  _renderAvailableItems = availableItems => {
-    const _availableItems = availableItems
-      .slice(0, this.props.showMaxAvailableItems)
-      .map(item => this._renderItem(item));
-    return (
-      <Table singleLine selectable className="document-items">
-        <Table.Header>
-          <Table.Row data-test="header">
-            <Table.HeaderCell />
-            <Table.HeaderCell>Barcode</Table.HeaderCell>
-            <Table.HeaderCell>
-              <span>Status</span>
-            </Table.HeaderCell>
-            <Table.HeaderCell>Location</Table.HeaderCell>
-            <Table.HeaderCell />
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>{_availableItems}</Table.Body>
-      </Table>
+  seeAllButton = () => {
+    const { document_pid } = this.props.loan.metadata;
+    const path = this.seeAllUrl(
+      itemApi
+        .query()
+        .withDocPid(document_pid)
+        .qs()
     );
+    return <SeeAllButton clickHandler={goToHandler(path)} />;
   };
 
-  _renderItem = item => {
+  assignItemButton(item) {
     return (
-      <Table.Row key={item.item_pid}>
-        <Table.Cell />
-        <Table.Cell>{item.barcode}</Table.Cell>
-        <Table.Cell>{item.status}</Table.Cell>
-        <Table.Cell>{item.internal_location}</Table.Cell>
-        <Table.Cell textAlign="right">
-          <Button
-            size="mini"
-            color="teal"
-            onClick={() => {
-              this.assignItemToLoan(item.id, this.props.loan.loan_pid);
-            }}
-          >
-            assign
-          </Button>
-        </Table.Cell>
-      </Table.Row>
+      <Button
+        size="mini"
+        color="teal"
+        onClick={() => {
+          this.assignItemToLoan(
+            item.metadata.item_pid,
+            this.props.loan.loan_pid
+          );
+        }}
+      >
+        assign
+      </Button>
     );
-  };
+  }
 
-  _renderAvailableItemsOrEmpty = availableItems => {
-    return availableItems.length ? (
-      this._renderAvailableItems(availableItems)
-    ) : (
-      <Message data-test="no-results">
-        There are no available items for this document
-      </Message>
+  checkoutItemButton(item, loan) {
+    return (
+      <Button
+        size="mini"
+        color="teal"
+        onClick={() => {
+          this.assignItemAndCheckout(
+            this.props.loan.loan_pid,
+            loan,
+            loan.availableActions.checkout,
+            item.metadata.item_pid
+          );
+        }}
+      >
+        checkout
+      </Button>
     );
-  };
+  }
+
+  prepareData(data) {
+    return data.hits.map(row => {
+      const entry = formatter.item.toTable(row);
+      entry['Actions'] = this.rowActionButton(row);
+      return pick(entry, [
+        'ID',
+        'Barcode',
+        'Status',
+        'Medium',
+        'Location',
+        'Shelf',
+        'Actions',
+      ]);
+    });
+  }
+
+  renderTable(data) {
+    const rows = this.prepareData(data);
+    rows.totalHits = data.total;
+    return (
+      <ResultsTable
+        rows={rows}
+        title={'Available items'}
+        name={'available items'}
+        rowActionClickHandler={row => goTo(this.showDetailsUrl(row.ID))}
+        seeAllComponent={this.seeAllButton()}
+        showMaxRows={this.props.showMaxItems}
+      />
+    );
+  }
+
+  rowActionButton(row) {
+    const { loan } = this.props;
+    if (loan.metadata.state === 'PENDING') {
+      return this.checkoutItemButton(row, loan);
+    } else {
+      return this.assignItemButton(row);
+    }
+  }
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>
-          <Header as="h3">Available items</Header>
-          {this._renderAvailableItemsOrEmpty(data.hits)}
-        </Error>
+        <Error error={error}>{this.renderTable(data)}</Error>
       </Loader>
     );
   }

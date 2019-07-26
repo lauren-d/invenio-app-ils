@@ -1,13 +1,15 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { generatePath } from 'react-router';
 import { Settings } from 'luxon';
 import { fromISO } from '../../../../../../common/api/date';
-import { BackOfficeURLS } from '../../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../../routes/urls';
 import DocumentPendingLoans from '../DocumentPendingLoans';
+import history from '../../../../../../history';
+
+jest.mock('../../../../../../common/config');
 
 Settings.defaultZoneName = 'utc';
-const d = fromISO('2018-01-01T11:05:00+01:00');
+const stringDate = fromISO('2018-01-01T11:05:00+01:00');
 
 describe('DocumentPendingLoans tests', () => {
   let component;
@@ -18,6 +20,7 @@ describe('DocumentPendingLoans tests', () => {
   });
 
   const doc = {
+    document_pid: 111,
     metadata: {
       document_pid: 111,
       item_pid: 222,
@@ -28,7 +31,6 @@ describe('DocumentPendingLoans tests', () => {
     const component = shallow(
       <DocumentPendingLoans
         document={doc}
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchPendingLoans={() => {}}
       />
@@ -41,7 +43,6 @@ describe('DocumentPendingLoans tests', () => {
     component = mount(
       <DocumentPendingLoans
         document={doc}
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchPendingLoans={mockedFetchPendingLoans}
       />
@@ -53,7 +54,6 @@ describe('DocumentPendingLoans tests', () => {
     component = mount(
       <DocumentPendingLoans
         document={doc}
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchPendingLoans={() => {}}
       />
@@ -70,20 +70,30 @@ describe('DocumentPendingLoans tests', () => {
     const data = {
       hits: [
         {
+          id: 1,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan1',
-          patron_pid: 'patron_1',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
+          metadata: {
+            loan_pid: 'loan1',
+            document_pid: 'doc1',
+            patron_pid: 'patron_1',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
         {
+          id: 2,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan2',
-          patron_pid: 'patron_2',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
+          metadata: {
+            loan_pid: 'loan2',
+            document_pid: 'doc1',
+            patron_pid: 'patron_2',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
       ],
       total: 2,
@@ -91,7 +101,6 @@ describe('DocumentPendingLoans tests', () => {
     component = mount(
       <DocumentPendingLoans
         document={doc}
-        history={() => {}}
         data={data}
         fetchPendingLoans={() => {}}
       />
@@ -117,29 +126,37 @@ describe('DocumentPendingLoans tests', () => {
     const data = {
       hits: [
         {
+          id: 1,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan1',
-          patron_pid: 'patron_1',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
+          metadata: {
+            loan_pid: 'loan1',
+            document_pid: 'doc1',
+            patron_pid: 'patron_1',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
         {
+          id: 2,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan2',
-          patron_pid: 'patron_2',
-          updated: d,
-          start_date: d,
-          end_date: d,
-          created: d,
+          metadata: {
+            loan_pid: 'loan2',
+            document_pid: 'doc1',
+            patron_pid: 'patron_2',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
       ],
       total: 2,
     };
-
     component = mount(
       <DocumentPendingLoans
         document={doc}
-        history={() => {}}
         data={data}
         fetchPendingLoans={() => {}}
         showMaxPendingLoans={1}
@@ -155,28 +172,42 @@ describe('DocumentPendingLoans tests', () => {
 
   it('should go to loan details when clicking on a pending loan', () => {
     const mockedHistoryPush = jest.fn();
-    const historyFn = {
-      push: mockedHistoryPush,
-    };
-
+    history.push = mockedHistoryPush;
     const data = {
       hits: [
         {
+          id: 1,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan1',
-          patron_pid: 'patron_1',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
+          metadata: {
+            loan_pid: 'loan1',
+            document_pid: 'doc1',
+            patron_pid: 'patron_1',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
+        },
+        {
+          id: 2,
+          updated: stringDate,
+          created: stringDate,
+          loan_pid: 'loan2',
+          metadata: {
+            loan_pid: 'loan2',
+            document_pid: 'doc1',
+            patron_pid: 'patron_2',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
       ],
-      total: 1,
+      total: 2,
     };
 
     component = mount(
       <DocumentPendingLoans
         document={doc}
-        history={historyFn}
         data={data}
         fetchPendingLoans={() => {}}
         showMaxPendingLoans={1}
@@ -190,9 +221,7 @@ describe('DocumentPendingLoans tests', () => {
       .find('i');
     button.simulate('click');
 
-    const expectedParam = generatePath(BackOfficeURLS.loanDetails, {
-      loanPid: firstId,
-    });
-    expect(mockedHistoryPush).toHaveBeenCalledWith(expectedParam);
+    const expectedParam = BackOfficeRoutes.loanDetailsFor(firstId);
+    expect(mockedHistoryPush).toHaveBeenCalledWith(expectedParam, {});
   });
 });

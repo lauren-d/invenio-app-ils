@@ -1,5 +1,5 @@
 import { invenioConfig } from '../../../common/config';
-import _capitalize from 'lodash/capitalize';
+import capitalize from 'lodash/capitalize';
 
 const resultsPerPageValues = [
   {
@@ -22,7 +22,21 @@ const sortByValues = config.sortBy.values.map(sortField => {
 });
 const sortByValueOnEmptyQuery = config.sortBy.onEmptyQuery;
 const sortOrderValues = config.sortOrder.map(sortField => {
-  return { text: _capitalize(sortField), value: sortField };
+  return { text: capitalize(sortField), value: sortField };
+});
+
+const aggsMappings = {
+  document_types: 'Document types',
+  has_eitems: 'Select books with',
+  has_items_for_loan: 'Select books with',
+  has_items: 'Select books with',
+  keywords: 'Keywords',
+  languages: 'Languages',
+  moi: 'Series: Mode of Issuance',
+};
+
+const aggs = config.aggs.map(agg => {
+  return { title: aggsMappings[agg], field: agg };
 });
 
 export default {
@@ -30,4 +44,5 @@ export default {
   SORT_BY: sortByValues,
   SORT_BY_ON_EMPTY_QUERY: sortByValueOnEmptyQuery,
   SORT_ORDER: sortOrderValues,
+  AGGREGATIONS: aggs,
 };

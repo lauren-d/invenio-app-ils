@@ -1,6 +1,9 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import ItemDetailsContainer from '../ItemDetailsContainer';
+
+jest.mock('../../../../common/config');
+
 jest.mock('../components/ItemDetails', () => {
   return {
     ItemDetails: () => null,
@@ -30,6 +33,7 @@ describe('ItemDetailsContainer tests', () => {
         history={routerHistory}
         match={routerUrlParams}
         fetchItemDetails={() => {}}
+        deleteItem={() => {}}
       />
     );
     expect(component).toMatchSnapshot();
@@ -42,6 +46,7 @@ describe('ItemDetailsContainer tests', () => {
         history={routerHistory}
         match={routerUrlParams}
         fetchItemDetails={mockedFetchItemDetails}
+        deleteItem={() => {}}
       />
     );
     expect(mockedFetchItemDetails).toHaveBeenCalledWith(

@@ -1,21 +1,28 @@
-import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+
 import ItemMetadataComponent from './ItemMetadata';
-import { fetchItemDetails } from '../../state/actions';
+import {
+  deleteItem,
+  fetchItemDetails,
+  createNewLoanForItem,
+  updateItem,
+} from '../../state/actions';
 
 const mapStateToProps = state => ({
+  error: state.itemDetails.error,
   itemDetails: state.itemDetails.data,
 });
 
 const mapDispatchToProps = dispatch => ({
   fetchItemDetails: itemPid => dispatch(fetchItemDetails(itemPid)),
+  deleteItem: itemPid => dispatch(deleteItem(itemPid)),
+  createNewLoanForItem: (loanData, url) =>
+    dispatch(createNewLoanForItem(loanData, url)),
+  updateItem: (itemPid, path, value) =>
+    dispatch(updateItem(itemPid, path, value)),
 });
 
-export const ItemMetadata = compose(
-  withRouter,
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
+export const ItemMetadata = connect(
+  mapStateToProps,
+  mapDispatchToProps
 )(ItemMetadataComponent);

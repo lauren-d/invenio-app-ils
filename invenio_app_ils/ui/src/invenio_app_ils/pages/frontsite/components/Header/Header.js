@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon, Menu, Dropdown } from 'semantic-ui-react';
-import { BackOfficeURLS } from '../../../../common/urls';
-import SearchBar from './components/SearchBar';
 import {
   authenticationService,
   sessionManager,
 } from '../../../../authentication/services';
-import { FrontSiteURLS } from '../../../../common/urls';
+import { FrontSiteRoutes, BackOfficeRoutes } from '../../../../routes/urls';
 import { LoginButton } from '../../../../common/components';
+import { goToHandler } from '../../../../history';
 import './Header.scss';
 
 export default class Header extends Component {
@@ -25,21 +24,24 @@ export default class Header extends Component {
     return (
       <Dropdown item trigger={trigger}>
         <Dropdown.Menu>
-          <Dropdown.Item>Your Requests</Dropdown.Item>
-          <Dropdown.Item>Your Loans</Dropdown.Item>
-          <Dropdown.Item>Profile</Dropdown.Item>
-          <Dropdown.Divider />
-          <Dropdown.Item
-            onClick={() => {
-              this.props.history.push(BackOfficeURLS.home);
-            }}
-          >
-            Backoffice
+          <Dropdown.Item onClick={goToHandler(FrontSiteRoutes.patronProfile)}>
+            Your Requests
           </Dropdown.Item>
+          <Dropdown.Item onClick={goToHandler(FrontSiteRoutes.patronProfile)}>
+            Your Loans
+          </Dropdown.Item>
+          {sessionManager.hasRoles(['admin', 'librarian']) ? (
+            <>
+              <Dropdown.Divider />
+              <Dropdown.Item onClick={goToHandler(BackOfficeRoutes.home)}>
+                Backoffice
+              </Dropdown.Item>
+            </>
+          ) : null}
           <Dropdown.Divider />
           <Dropdown.Item
             onClick={() => {
-              authenticationService.logout(FrontSiteURLS.home);
+              authenticationService.logout(FrontSiteRoutes.home);
             }}
           >
             Sign out
@@ -54,7 +56,7 @@ export default class Header extends Component {
     return !sessionManager.authenticated ? (
       <LoginButton
         clickHandler={() => {
-          authenticationService.login(FrontSiteURLS.home);
+          authenticationService.login(FrontSiteRoutes.home);
         }}
       />
     ) : (
@@ -70,14 +72,12 @@ export default class Header extends Component {
         fixed="top"
         inverted
         className="header-menu"
+        widths={3}
       >
-        <Menu.Item header className="logo">
-          <Link to="/">Library</Link>
-        </Menu.Item>
         <Menu.Item>
-          <SearchBar />
+          <Link to="/">ILS</Link>
         </Menu.Item>
-        <Menu.Item position="right">{this.renderRightMenuItem()}</Menu.Item>
+        <Menu.Item>{this.renderRightMenuItem()}</Menu.Item>
       </Menu>
     );
   }

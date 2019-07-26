@@ -1,60 +1,53 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { generatePath } from 'react-router';
 import { Loader, Error } from '../../../../../../common/components';
 import { ResultsTable } from '../../../../../../common/components';
 import { loan as loanApi } from '../../../../../../common/api';
-import {
-  BackOfficeURLS,
-  loanSearchQueryUrl,
-} from '../../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../../routes/urls';
 import { DateTime } from 'luxon';
-import { toShortDateTime } from '../../../../../../common/api/date';
 import { formatter } from '../../../../../../common/components/ResultsTable/formatters';
 import { SeeAllButton } from '../../../../components/buttons';
+import { goTo, goToHandler } from '../../../../../../history';
+import { toShortDate } from '../../../../../../common/api/date';
+import pick from 'lodash/pick';
 
 export default class IdleLoansList extends Component {
   constructor(props) {
     super(props);
     this.fetchIdlePendingLoans = props.fetchIdlePendingLoans;
-    this.showDetailsUrl = BackOfficeURLS.loanDetails;
-    this.seeAllUrl = loanSearchQueryUrl;
+    this.showDetailsUrl = BackOfficeRoutes.loanDetailsFor;
+    this.seeAllUrl = BackOfficeRoutes.loansListWithQuery;
   }
 
   componentDidMount() {
     this.fetchIdlePendingLoans();
   }
 
-  _showDetailsHandler = loan_pid =>
-    this.props.history.push(
-      generatePath(this.showDetailsUrl, { loanPid: loan_pid })
+  seeAllButton = () => {
+    const path = this.seeAllUrl(
+      loanApi
+        .query()
+        .withState('PENDING')
+        .withUpdated({ to: toShortDate(DateTime.local().minus({ days: 10 })) })
+        .qs()
     );
-
-  _seeAllButton = () => {
-    const _click = () =>
-      this.props.history.push(
-        this.seeAllUrl(
-          loanApi
-            .query()
-            .withState('PENDING')
-            .withUpdated({ to: DateTime.local().minus({ days: 10 }) })
-            .qs()
-        )
-      );
-
-    return <SeeAllButton clickHandler={() => _click()} />;
+    return <SeeAllButton clickHandler={goToHandler(path)} />;
   };
 
   prepareData(data) {
     return data.hits.map(row => {
       let serialized = formatter.loan.toTable(row);
-      delete serialized['Request created'];
-      serialized['Last update'] = toShortDateTime(row.updated);
-      return serialized;
+      return pick(serialized, [
+        'ID',
+        'Updated',
+        'Patron ID',
+        'Document ID',
+        'Start date',
+      ]);
     });
   }
 
-  _render_table(data) {
+  renderTable(data) {
     const rows = this.prepareData(data);
     rows.totalHits = data.total;
     return (
@@ -62,19 +55,19 @@ export default class IdleLoansList extends Component {
         rows={rows}
         title={'Idle loans'}
         subtitle={'Loan requests in PENDING state longer than 10 days.'}
-        rowActionClickHandler={this._showDetailsHandler}
-        seeAllComponent={this._seeAllButton()}
+        name={'idle loans'}
+        rowActionClickHandler={row => goTo(this.showDetailsUrl(row.ID))}
+        seeAllComponent={this.seeAllButton()}
         showMaxRows={this.props.showMaxEntries}
       />
     );
   }
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._render_table(data)}</Error>
+        <Error error={error}>{this.renderTable(data)}</Error>
       </Loader>
     );
   }

@@ -2,13 +2,13 @@
 
 exports[`DocumentPendingLoans tests should load the details component 1`] = `
 <Loader>
-  <Error
-    error={null}
-  >
+  <Error>
     <ResultsTable
       fixed={false}
       headerActionClickHandler={null}
       headerActionComponent={null}
+      name="pending loan requests"
+      renderSegment={true}
       rowActionClickHandler={[Function]}
       rows={Array []}
       seeAllComponent={
@@ -34,18 +34,28 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
       "hits": Array [
         Object {
           "created": "2018-01-01T10:05:00.000Z",
-          "end_date": "2018-01-01T10:05:00.000Z",
+          "id": 1,
           "loan_pid": "loan1",
-          "patron_pid": "patron_1",
-          "start_date": "2018-01-01T10:05:00.000Z",
+          "metadata": Object {
+            "document_pid": "doc1",
+            "end_date": "2018-01-01T10:05:00.000Z",
+            "loan_pid": "loan1",
+            "patron_pid": "patron_1",
+            "start_date": "2018-01-01T10:05:00.000Z",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
         Object {
           "created": "2018-01-01T10:05:00.000Z",
-          "end_date": "2018-01-01T10:05:00.000Z",
+          "id": 2,
           "loan_pid": "loan2",
-          "patron_pid": "patron_2",
-          "start_date": "2018-01-01T10:05:00.000Z",
+          "metadata": Object {
+            "document_pid": "doc1",
+            "end_date": "2018-01-01T10:05:00.000Z",
+            "loan_pid": "loan2",
+            "patron_pid": "patron_2",
+            "start_date": "2018-01-01T10:05:00.000Z",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
       ],
@@ -54,6 +64,7 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
   }
   document={
     Object {
+      "document_pid": 111,
       "metadata": Object {
         "document_pid": 111,
         "item_pid": 222,
@@ -61,31 +72,30 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
     }
   }
   fetchPendingLoans={[Function]}
-  history={[Function]}
   showMaxPendingLoans={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="pending loan requests"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={
           Array [
             Object {
               "ID": "loan1",
               "Patron ID": "patron_1",
-              "Request created": "2018-01-01 10:05",
-              "State": undefined,
+              "Start date": "2018-01-01",
+              "Updated": "2018-01-01 10:05",
             },
             Object {
               "ID": "loan2",
               "Patron ID": "patron_2",
-              "Request created": "2018-01-01 10:05",
-              "State": undefined,
+              "Start date": "2018-01-01",
+              "Updated": "2018-01-01 10:05",
             },
           ]
         }
@@ -164,9 +174,9 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                   columns={
                     Array [
                       "ID",
-                      "Request created",
+                      "Updated",
                       "Patron ID",
-                      "State",
+                      "Start date",
                     ]
                   }
                   withRowAction={true}
@@ -221,7 +231,7 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="Request created"
+                            key="Updated"
                           >
                             <TableCell
                               as="th"
@@ -230,7 +240,7 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                               <th
                                 className=""
                               >
-                                Request created
+                                Updated
                               </th>
                             </TableCell>
                           </TableHeaderCell>
@@ -251,7 +261,7 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="State"
+                            key="Start date"
                           >
                             <TableCell
                               as="th"
@@ -260,7 +270,7 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                               <th
                                 className=""
                               >
-                                State
+                                Start date
                               </th>
                             </TableCell>
                           </TableHeaderCell>
@@ -273,9 +283,9 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                   columns={
                     Array [
                       "ID",
-                      "Request created",
+                      "Updated",
                       "Patron ID",
-                      "State",
+                      "Start date",
                     ]
                   }
                   rowActionClickHandler={[Function]}
@@ -284,14 +294,14 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                       Object {
                         "ID": "loan1",
                         "Patron ID": "patron_1",
-                        "Request created": "2018-01-01 10:05",
-                        "State": undefined,
+                        "Start date": "2018-01-01",
+                        "Updated": "2018-01-01 10:05",
                       },
                       Object {
                         "ID": "loan2",
                         "Patron ID": "patron_2",
-                        "Request created": "2018-01-01 10:05",
-                        "State": undefined,
+                        "Start date": "2018-01-01",
+                        "Updated": "2018-01-01 10:05",
                       },
                     ]
                   }
@@ -359,12 +369,12 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Request created-loan1"
+                            data-test="Updated-loan1"
                             key="1-loan1"
                           >
                             <td
                               className=""
-                              data-test="Request created-loan1"
+                              data-test="Updated-loan1"
                             >
                               2018-01-01 10:05
                             </td>
@@ -383,14 +393,14 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="State-loan1"
+                            data-test="Start date-loan1"
                             key="3-loan1"
                           >
                             <td
                               className=""
-                              data-test="State-loan1"
+                              data-test="Start date-loan1"
                             >
-                              -
+                              2018-01-01
                             </td>
                           </TableCell>
                         </tr>
@@ -452,12 +462,12 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Request created-loan2"
+                            data-test="Updated-loan2"
                             key="1-loan2"
                           >
                             <td
                               className=""
-                              data-test="Request created-loan2"
+                              data-test="Updated-loan2"
                             >
                               2018-01-01 10:05
                             </td>
@@ -476,14 +486,14 @@ exports[`DocumentPendingLoans tests should render pending loans 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="State-loan2"
+                            data-test="Start date-loan2"
                             key="3-loan2"
                           >
                             <td
                               className=""
-                              data-test="State-loan2"
+                              data-test="Start date-loan2"
                             >
-                              -
+                              2018-01-01
                             </td>
                           </TableCell>
                         </tr>
@@ -523,6 +533,7 @@ exports[`DocumentPendingLoans tests should render show a message with no pending
   }
   document={
     Object {
+      "document_pid": 111,
       "metadata": Object {
         "document_pid": 111,
         "item_pid": 222,
@@ -530,17 +541,16 @@ exports[`DocumentPendingLoans tests should render show a message with no pending
     }
   }
   fetchPendingLoans={[Function]}
-  history={[Function]}
   showMaxPendingLoans={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="pending loan requests"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={Array []}
         seeAllComponent={
@@ -614,6 +624,8 @@ exports[`DocumentPendingLoans tests should render show a message with no pending
                 data-test="no-results"
               >
                 There are no 
+                pending loan requests
+                .
               </div>
             </Message>
           </div>
@@ -631,18 +643,28 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
       "hits": Array [
         Object {
           "created": "2018-01-01T10:05:00.000Z",
-          "end_date": "2018-01-01T10:05:00.000Z",
+          "id": 1,
           "loan_pid": "loan1",
-          "patron_pid": "patron_1",
-          "start_date": "2018-01-01T10:05:00.000Z",
+          "metadata": Object {
+            "document_pid": "doc1",
+            "end_date": "2018-01-01T10:05:00.000Z",
+            "loan_pid": "loan1",
+            "patron_pid": "patron_1",
+            "start_date": "2018-01-01T10:05:00.000Z",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
         Object {
           "created": "2018-01-01T10:05:00.000Z",
-          "end_date": "2018-01-01T10:05:00.000Z",
+          "id": 2,
           "loan_pid": "loan2",
-          "patron_pid": "patron_2",
-          "start_date": "2018-01-01T10:05:00.000Z",
+          "metadata": Object {
+            "document_pid": "doc1",
+            "end_date": "2018-01-01T10:05:00.000Z",
+            "loan_pid": "loan2",
+            "patron_pid": "patron_2",
+            "start_date": "2018-01-01T10:05:00.000Z",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
       ],
@@ -651,6 +673,7 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
   }
   document={
     Object {
+      "document_pid": 111,
       "metadata": Object {
         "document_pid": 111,
         "item_pid": 222,
@@ -658,31 +681,30 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
     }
   }
   fetchPendingLoans={[Function]}
-  history={[Function]}
   showMaxPendingLoans={1}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="pending loan requests"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={
           Array [
             Object {
               "ID": "loan1",
               "Patron ID": "patron_1",
-              "Request created": "2018-01-01 10:05",
-              "State": undefined,
+              "Start date": "2018-01-01",
+              "Updated": "2018-01-01 10:05",
             },
             Object {
               "ID": "loan2",
               "Patron ID": "patron_2",
-              "Request created": "2018-01-01 10:05",
-              "State": undefined,
+              "Start date": "2018-01-01",
+              "Updated": "2018-01-01 10:05",
             },
           ]
         }
@@ -761,9 +783,9 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                   columns={
                     Array [
                       "ID",
-                      "Request created",
+                      "Updated",
                       "Patron ID",
-                      "State",
+                      "Start date",
                     ]
                   }
                   withRowAction={true}
@@ -818,7 +840,7 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="Request created"
+                            key="Updated"
                           >
                             <TableCell
                               as="th"
@@ -827,7 +849,7 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                               <th
                                 className=""
                               >
-                                Request created
+                                Updated
                               </th>
                             </TableCell>
                           </TableHeaderCell>
@@ -848,7 +870,7 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="State"
+                            key="Start date"
                           >
                             <TableCell
                               as="th"
@@ -857,7 +879,7 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                               <th
                                 className=""
                               >
-                                State
+                                Start date
                               </th>
                             </TableCell>
                           </TableHeaderCell>
@@ -870,9 +892,9 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                   columns={
                     Array [
                       "ID",
-                      "Request created",
+                      "Updated",
                       "Patron ID",
-                      "State",
+                      "Start date",
                     ]
                   }
                   rowActionClickHandler={[Function]}
@@ -881,8 +903,8 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                       Object {
                         "ID": "loan1",
                         "Patron ID": "patron_1",
-                        "Request created": "2018-01-01 10:05",
-                        "State": undefined,
+                        "Start date": "2018-01-01",
+                        "Updated": "2018-01-01 10:05",
                       },
                     ]
                   }
@@ -950,12 +972,12 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Request created-loan1"
+                            data-test="Updated-loan1"
                             key="1-loan1"
                           >
                             <td
                               className=""
-                              data-test="Request created-loan1"
+                              data-test="Updated-loan1"
                             >
                               2018-01-01 10:05
                             </td>
@@ -974,14 +996,14 @@ exports[`DocumentPendingLoans tests should render the see all button when showin
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="State-loan1"
+                            data-test="Start date-loan1"
                             key="3-loan1"
                           >
                             <td
                               className=""
-                              data-test="State-loan1"
+                              data-test="Start date-loan1"
                             >
-                              -
+                              2018-01-01
                             </td>
                           </TableCell>
                         </tr>

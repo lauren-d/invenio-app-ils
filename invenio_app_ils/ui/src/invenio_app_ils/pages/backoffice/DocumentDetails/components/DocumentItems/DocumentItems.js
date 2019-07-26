@@ -1,80 +1,71 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Loader, Error } from '../../../../../common/components';
-import { toShortDateTime } from '../../../../../common/api/date';
 import { ResultsTable } from '../../../../../common/components';
 import { item as itemApi } from '../../../../../common/api';
 
-import {
-  itemSearchQueryUrl,
-  viewItemDetailsUrl,
-} from '../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../routes/urls';
 import { SeeAllButton } from '../../../components/buttons';
+import { formatter } from '../../../../../common/components/ResultsTable/formatters';
+import { goTo, goToHandler } from '../../../../../history';
+import pick from 'lodash/pick';
 
 export default class DocumentItems extends Component {
   constructor(props) {
     super(props);
     this.fetchDocumentItems = props.fetchDocumentItems;
-    this.showDetailsUrl = viewItemDetailsUrl;
-    this.seeAllUrl = itemSearchQueryUrl;
+    this.showDetailsUrl = BackOfficeRoutes.itemDetailsFor;
+    this.seeAllUrl = BackOfficeRoutes.itemsListWithQuery;
   }
 
   componentDidMount() {
-    const { document_pid } = this.props.document;
-    this.fetchDocumentItems(document_pid);
+    this.fetchDocumentItems(this.props.document.document_pid);
   }
 
-  _getFormattedDate = d => (d ? toShortDateTime(d) : '');
-
-  _showDetailsHandler = item_pid =>
-    this.props.history.push(this.showDetailsUrl(item_pid));
-
-  _seeAllButton = () => {
-    const { document_pid } = this.props.document;
-    const _click = () =>
-      this.props.history.push(
-        this.seeAllUrl(
-          itemApi
-            .query()
-            .withDocPid(document_pid)
-            .qs()
-        )
-      );
-    return <SeeAllButton clickHandler={() => _click()} />;
+  seeAllButton = () => {
+    const path = this.seeAllUrl(
+      itemApi
+        .query()
+        .withDocPid(this.props.document.document_pid)
+        .qs()
+    );
+    return <SeeAllButton clickHandler={goToHandler(path)} />;
   };
 
   prepareData(data) {
-    return data.hits.map(row => ({
-      ID: row.item_pid,
-      Updated: this._getFormattedDate(row.updated),
-      Barcode: row.barcode,
-      Medium: row.medium,
-      Status: row.status,
-      Location: row.location ? row.location : '-',
-      Shelf: row.shelf,
-    }));
+    return data.hits.map(row => {
+      const entry = formatter.item.toTable(row);
+      return pick(entry, [
+        'ID',
+        'Barcode',
+        'Status',
+        'Medium',
+        'Location',
+        'Shelf',
+      ]);
+    });
   }
 
-  _render_table(data) {
+  renderTable(data) {
     const rows = this.prepareData(data);
     rows.totalHits = data.total;
     return (
       <ResultsTable
         rows={rows}
         title={'Attached items'}
-        rowActionClickHandler={this._showDetailsHandler}
-        seeAllComponent={this._seeAllButton()}
+        name={'attached items'}
+        rowActionClickHandler={row => goTo(this.showDetailsUrl(row.ID))}
+        seeAllComponent={this.seeAllButton()}
         showMaxRows={this.props.showMaxItems}
       />
     );
   }
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._render_table(data)}</Error>
+        <Error error={error}>{this.renderTable(data)}</Error>
       </Loader>
     );
   }

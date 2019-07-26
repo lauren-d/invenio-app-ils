@@ -44,16 +44,21 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
         text="New item"
       />
     }
+    name="items"
+    renderSegment={true}
     rowActionClickHandler={[Function]}
     rows={
       Array [
         Object {
-          "Created": "2018-01-01",
+          "Barcode": "9865745223",
+          "Circulation status": null,
           "Document ID": 1342,
           "ID": 987,
           "Internal location": "A library",
+          "Location": null,
+          "Medium": undefined,
+          "Shelf": undefined,
           "Status": "IN_BINDING",
-          "Updated": "",
         },
       ]
     }
@@ -139,11 +144,14 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
               columns={
                 Array [
                   "ID",
+                  "Barcode",
                   "Document ID",
                   "Status",
+                  "Medium",
+                  "Circulation status",
                   "Internal location",
-                  "Created",
-                  "Updated",
+                  "Location",
+                  "Shelf",
                 ]
               }
               withRowAction={true}
@@ -198,6 +206,21 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                       </TableHeaderCell>
                       <TableHeaderCell
                         as="th"
+                        key="Barcode"
+                      >
+                        <TableCell
+                          as="th"
+                          className=""
+                        >
+                          <th
+                            className=""
+                          >
+                            Barcode
+                          </th>
+                        </TableCell>
+                      </TableHeaderCell>
+                      <TableHeaderCell
+                        as="th"
                         key="Document ID"
                       >
                         <TableCell
@@ -228,6 +251,36 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                       </TableHeaderCell>
                       <TableHeaderCell
                         as="th"
+                        key="Medium"
+                      >
+                        <TableCell
+                          as="th"
+                          className=""
+                        >
+                          <th
+                            className=""
+                          >
+                            Medium
+                          </th>
+                        </TableCell>
+                      </TableHeaderCell>
+                      <TableHeaderCell
+                        as="th"
+                        key="Circulation status"
+                      >
+                        <TableCell
+                          as="th"
+                          className=""
+                        >
+                          <th
+                            className=""
+                          >
+                            Circulation status
+                          </th>
+                        </TableCell>
+                      </TableHeaderCell>
+                      <TableHeaderCell
+                        as="th"
                         key="Internal location"
                       >
                         <TableCell
@@ -243,7 +296,7 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                       </TableHeaderCell>
                       <TableHeaderCell
                         as="th"
-                        key="Created"
+                        key="Location"
                       >
                         <TableCell
                           as="th"
@@ -252,13 +305,13 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                           <th
                             className=""
                           >
-                            Created
+                            Location
                           </th>
                         </TableCell>
                       </TableHeaderCell>
                       <TableHeaderCell
                         as="th"
-                        key="Updated"
+                        key="Shelf"
                       >
                         <TableCell
                           as="th"
@@ -267,7 +320,7 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                           <th
                             className=""
                           >
-                            Updated
+                            Shelf
                           </th>
                         </TableCell>
                       </TableHeaderCell>
@@ -280,23 +333,29 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
               columns={
                 Array [
                   "ID",
+                  "Barcode",
                   "Document ID",
                   "Status",
+                  "Medium",
+                  "Circulation status",
                   "Internal location",
-                  "Created",
-                  "Updated",
+                  "Location",
+                  "Shelf",
                 ]
               }
               rowActionClickHandler={[Function]}
               rows={
                 Array [
                   Object {
-                    "Created": "2018-01-01",
+                    "Barcode": "9865745223",
+                    "Circulation status": null,
                     "Document ID": 1342,
                     "ID": 987,
                     "Internal location": "A library",
+                    "Location": null,
+                    "Medium": undefined,
+                    "Shelf": undefined,
                     "Status": "IN_BINDING",
-                    "Updated": "",
                   },
                 ]
               }
@@ -364,8 +423,20 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                       </TableCell>
                       <TableCell
                         as="td"
-                        data-test="Document ID-987"
+                        data-test="Barcode-987"
                         key="1-987"
+                      >
+                        <td
+                          className=""
+                          data-test="Barcode-987"
+                        >
+                          9865745223
+                        </td>
+                      </TableCell>
+                      <TableCell
+                        as="td"
+                        data-test="Document ID-987"
+                        key="2-987"
                       >
                         <td
                           className=""
@@ -377,7 +448,7 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                       <TableCell
                         as="td"
                         data-test="Status-987"
-                        key="2-987"
+                        key="3-987"
                       >
                         <td
                           className=""
@@ -388,8 +459,32 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                       </TableCell>
                       <TableCell
                         as="td"
+                        data-test="Medium-987"
+                        key="4-987"
+                      >
+                        <td
+                          className=""
+                          data-test="Medium-987"
+                        >
+                          -
+                        </td>
+                      </TableCell>
+                      <TableCell
+                        as="td"
+                        data-test="Circulation status-987"
+                        key="5-987"
+                      >
+                        <td
+                          className=""
+                          data-test="Circulation status-987"
+                        >
+                          -
+                        </td>
+                      </TableCell>
+                      <TableCell
+                        as="td"
                         data-test="Internal location-987"
-                        key="3-987"
+                        key="6-987"
                       >
                         <td
                           className=""
@@ -400,24 +495,24 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
                       </TableCell>
                       <TableCell
                         as="td"
-                        data-test="Created-987"
-                        key="4-987"
+                        data-test="Location-987"
+                        key="7-987"
                       >
                         <td
                           className=""
-                          data-test="Created-987"
+                          data-test="Location-987"
                         >
-                          2018-01-01
+                          -
                         </td>
                       </TableCell>
                       <TableCell
                         as="td"
-                        data-test="Updated-987"
-                        key="5-987"
+                        data-test="Shelf-987"
+                        key="8-987"
                       >
                         <td
                           className=""
-                          data-test="Updated-987"
+                          data-test="Shelf-987"
                         >
                           -
                         </td>
@@ -429,7 +524,7 @@ exports[`ItemsSearch ResultsList tests should render a list of results 1`] = `
             </ResultsTableBody>
             <ResultsTableFooter
               allRowsNumber={1}
-              columnsNumber={6}
+              columnsNumber={9}
               seeAllComponent={null}
               showMaxRows={10}
             />

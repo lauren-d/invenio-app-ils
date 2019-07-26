@@ -2,6 +2,8 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import DocumentsCard from '../DocumentsCard';
 
+jest.mock('../../../../../../../common/config');
+
 describe('DocumentsCard tests', () => {
   let component;
   afterEach(() => {
@@ -15,7 +17,6 @@ describe('DocumentsCard tests', () => {
 
     const component = shallow(
       <DocumentsCard
-        history={() => {}}
         data={0}
         fetchRequestedWithAvailableItems={mockedFetchDocuments}
       />
@@ -29,7 +30,6 @@ describe('DocumentsCard tests', () => {
 
     component = mount(
       <DocumentsCard
-        history={() => {}}
         data={data}
         fetchRequestedWithAvailableItems={mockedFetchDocuments}
       />

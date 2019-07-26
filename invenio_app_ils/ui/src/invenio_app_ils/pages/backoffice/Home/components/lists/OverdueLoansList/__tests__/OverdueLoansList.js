@@ -2,11 +2,14 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { Settings } from 'luxon';
 import { fromISO } from '../../../../../../../common/api/date';
-import { viewLoanDetailsUrl } from '../../../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../../../routes/urls';
 import OverdueLoansList from '../OverdueLoansList';
+import history from '../../../../../../../history';
+
+jest.mock('../../../../../../../common/config');
 
 Settings.defaultZoneName = 'utc';
-const d = fromISO('2018-01-01T11:05:00+01:00');
+const stringDate = fromISO('2018-01-01T11:05:00+01:00');
 
 describe('OverdueLoansList tests', () => {
   let component;
@@ -19,7 +22,6 @@ describe('OverdueLoansList tests', () => {
   it('should load the details component', () => {
     const component = shallow(
       <OverdueLoansList
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchOverdueLoans={() => {}}
       />
@@ -31,7 +33,6 @@ describe('OverdueLoansList tests', () => {
     const mockedFetchLoans = jest.fn();
     component = mount(
       <OverdueLoansList
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchOverdueLoans={mockedFetchLoans}
       />
@@ -42,7 +43,6 @@ describe('OverdueLoansList tests', () => {
   it('should render show a message with no loans', () => {
     component = mount(
       <OverdueLoansList
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchOverdueLoans={() => {}}
       />
@@ -59,31 +59,36 @@ describe('OverdueLoansList tests', () => {
     const data = {
       hits: [
         {
+          id: 1,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan1',
-          patron_pid: 'patron_1',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
+          metadata: {
+            loan_pid: 'loan1',
+            document_pid: 'doc1',
+            patron_pid: 'patron_1',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
         {
+          id: 2,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan2',
-          patron_pid: 'patron_2',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
+          metadata: {
+            loan_pid: 'loan2',
+            document_pid: 'doc1',
+            patron_pid: 'patron_2',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
       ],
       total: 2,
     };
-
     component = mount(
-      <OverdueLoansList
-        history={() => {}}
-        data={data}
-        fetchOverdueLoans={() => {}}
-      />
+      <OverdueLoansList data={data} fetchOverdueLoans={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
@@ -104,20 +109,21 @@ describe('OverdueLoansList tests', () => {
 
   it('should go to loan details when clicking on a loan', () => {
     const mockedHistoryPush = jest.fn();
-    const historyFn = {
-      push: mockedHistoryPush,
-    };
-
+    history.push = mockedHistoryPush;
     const data = {
       hits: [
         {
-          ID: 'loan1',
+          id: 1,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan1',
-          patron_pid: 'patron_1',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
+          metadata: {
+            loan_pid: 'loan1',
+            patron_pid: 'patron_1',
+            start_date: stringDate,
+            end_date: stringDate,
+            document_pid: 'doc1',
+          },
         },
       ],
       total: 1,
@@ -125,7 +131,6 @@ describe('OverdueLoansList tests', () => {
 
     component = mount(
       <OverdueLoansList
-        history={historyFn}
         data={data}
         fetchOverdueLoans={() => {}}
         showMaxEntries={1}
@@ -139,7 +144,7 @@ describe('OverdueLoansList tests', () => {
       .find('i');
     button.simulate('click');
 
-    const expectedParam = viewLoanDetailsUrl(firstId);
-    expect(mockedHistoryPush).toHaveBeenCalledWith(expectedParam);
+    const expectedParam = BackOfficeRoutes.loanDetailsFor(firstId);
+    expect(mockedHistoryPush).toHaveBeenCalledWith(expectedParam, {});
   });
 });

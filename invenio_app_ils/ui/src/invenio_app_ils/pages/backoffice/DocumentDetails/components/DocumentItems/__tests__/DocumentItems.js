@@ -1,13 +1,15 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { generatePath } from 'react-router';
-import { BackOfficeURLS } from '../../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../../routes/urls';
 import DocumentItems from '../DocumentItems';
 import { Settings } from 'luxon';
 import { fromISO } from '../../../../../../common/api/date';
+import history from '../../../../../../history';
+
+jest.mock('../../../../../../common/config');
 
 Settings.defaultZoneName = 'utc';
-const d = fromISO('2018-01-01T11:05:00+01:00');
+const stringDate = fromISO('2018-01-01T11:05:00+01:00');
 
 describe('DocumentItems tests', () => {
   let component;
@@ -18,6 +20,7 @@ describe('DocumentItems tests', () => {
   });
 
   const doc = {
+    document_pid: 111,
     metadata: {
       document_pid: 111,
     },
@@ -27,7 +30,6 @@ describe('DocumentItems tests', () => {
     const component = shallow(
       <DocumentItems
         document={doc}
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchDocumentItems={() => {}}
       />
@@ -40,7 +42,6 @@ describe('DocumentItems tests', () => {
     component = mount(
       <DocumentItems
         document={doc}
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchDocumentItems={mockedFetchDocumentItems}
       />
@@ -52,7 +53,6 @@ describe('DocumentItems tests', () => {
     component = mount(
       <DocumentItems
         document={doc}
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchDocumentItems={() => {}}
       />
@@ -69,30 +69,37 @@ describe('DocumentItems tests', () => {
     const data = {
       hits: [
         {
-          ID: 'item1',
-          document_pid: 'doc1',
+          ID: '1',
+          updated: stringDate,
+          created: stringDate,
           item_pid: 'item1',
-          updated: d,
-          location: 'Somewhere',
+          metadata: {
+            document_pid: 'doc1',
+            item_pid: 'item1',
+            internal_location: { location: { name: 'Somewhere' } },
+            barcode: '44444',
+            shelf: 'P',
+          },
         },
         {
-          ID: 'item2',
-          document_pid: 'doc2',
+          id: '2',
+          updated: stringDate,
+          created: stringDate,
           item_pid: 'item2',
-          updated: d,
-          location: 'Somewhere',
+          metadata: {
+            document_pid: 'doc2',
+            item_pid: 'item2',
+            internal_location: { location: { name: 'Somewhere' } },
+            barcode: '44444',
+            shelf: 'P',
+          },
         },
       ],
       total: 2,
     };
 
     component = mount(
-      <DocumentItems
-        document={doc}
-        history={() => {}}
-        data={data}
-        fetchDocumentItems={() => {}}
-      />
+      <DocumentItems document={doc} data={data} fetchDocumentItems={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
@@ -115,18 +122,28 @@ describe('DocumentItems tests', () => {
     const data = {
       hits: [
         {
-          ID: '1',
-          document_pid: 'doc1',
-          item_pid: 'item1',
-          updated: d,
-          location: 'Somewhere',
+          id: '1',
+          updated: stringDate,
+          created: stringDate,
+          metadata: {
+            document_pid: 'doc1',
+            item_pid: 'item1',
+            internal_location: { location: { name: 'Somewhere' } },
+            barcode: '44444',
+            shelf: 'P',
+          },
         },
         {
-          ID: '2',
-          document_pid: 'doc2',
-          item_pid: 'item2',
-          updated: d,
-          location: 'Somewhere',
+          id: '2',
+          updated: stringDate,
+          created: stringDate,
+          metadata: {
+            document_pid: 'doc2',
+            item_pid: 'item2',
+            internal_location: { location: { name: 'Somewhere' } },
+            barcode: '44444',
+            shelf: 'P',
+          },
         },
       ],
       total: 2,
@@ -135,7 +152,6 @@ describe('DocumentItems tests', () => {
     component = mount(
       <DocumentItems
         document={doc}
-        history={() => {}}
         data={data}
         fetchDocumentItems={() => {}}
         showMaxItems={1}
@@ -151,18 +167,21 @@ describe('DocumentItems tests', () => {
 
   it('should go to items details when clicking on a item row', () => {
     const mockedHistoryPush = jest.fn();
-    const historyFn = {
-      push: mockedHistoryPush,
-    };
-
+    history.push = mockedHistoryPush;
     const data = {
       hits: [
         {
           ID: '1',
-          document_pid: 'doc1',
+          updated: stringDate,
+          created: stringDate,
           item_pid: 'item1',
-          updated: d,
-          location: 'Somewhere',
+          metadata: {
+            document_pid: 'doc1',
+            item_pid: 'item1',
+            internal_location: { location: { name: 'Somewhere' } },
+            shelf: 'P',
+            barcode: '44444',
+          },
         },
       ],
       total: 2,
@@ -171,7 +190,6 @@ describe('DocumentItems tests', () => {
     component = mount(
       <DocumentItems
         document={doc}
-        history={historyFn}
         data={data}
         fetchDocumentItems={() => {}}
         showMaxItems={1}
@@ -185,9 +203,7 @@ describe('DocumentItems tests', () => {
       .find('i');
     button.simulate('click');
 
-    const expectedParam = generatePath(BackOfficeURLS.itemDetails, {
-      itemPid: firstId,
-    });
-    expect(mockedHistoryPush).toHaveBeenCalledWith(expectedParam);
+    const expectedParam = BackOfficeRoutes.itemDetailsFor(firstId);
+    expect(mockedHistoryPush).toHaveBeenCalledWith(expectedParam, {});
   });
 });

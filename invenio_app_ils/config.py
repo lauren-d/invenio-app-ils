@@ -19,14 +19,36 @@ from datetime import timedelta
 
 from flask import request
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
-from invenio_circulation.search.api import LoansSearch
+from invenio_pidrelations.config import RelationType
 from invenio_records_rest.facets import terms_filter
+from invenio_records_rest.utils import deny_all
 
-from .indexer import DocumentIndexer, ItemIndexer, LoanIndexer
+from .api import can_item_circulate, document_exists, \
+    get_document_pid_by_item_pid, get_item_pids_by_document_pid, \
+    get_location_pid_by_item_pid, item_exists, patron_exists
+from .circulation.search import IlsLoansSearch
+from .facets import keyed_range_filter
 from .jwt import ils_jwt_create_token
-from .records.api import Document, InternalLocation, Item, Location
-from .records.jsonresolver.loan import item_resolver
+from .records.resolver.loan import item_resolver
 
+from .indexer import (  # isort:skip
+    DocumentIndexer,
+    ItemIndexer,
+    EItemIndexer,
+    KeywordIndexer,
+    LoanIndexer,
+    LocationIndexer,
+    SeriesIndexer,
+)
+from .records.api import (  # isort:skip
+    Document,
+    Item,
+    EItem,
+    Keyword,
+    Location,
+    InternalLocation,
+    Series,
+)
 from .records.permissions import (  # isort:skip
     record_create_permission_factory,
     record_delete_permission_factory,
@@ -36,13 +58,16 @@ from .records.permissions import (  # isort:skip
 
 from .search.api import (  # isort:skip
     DocumentSearch,
-    InternalLocationSearch,
     ItemSearch,
+    EItemSearch,
+    KeywordSearch,
     LocationSearch,
+    InternalLocationSearch,
+    SeriesSearch,
+    PatronsSearch
 )
 
 from invenio_circulation.config import (  # isort:skip
-    CIRCULATION_POLICIES,
     _LOANID_CONVERTER,
 )
 from invenio_circulation.pidstore.pids import (  # isort:skip
@@ -61,17 +86,10 @@ from .circulation.utils import (  # isort:skip
     circulation_default_extension_duration,
     circulation_default_extension_max_count,
     circulation_default_loan_duration,
-    circulation_document_retriever,
-    circulation_is_item_available,
     circulation_is_loan_duration_valid,
-    circulation_item_exists,
-    circulation_item_location_retriever,
-    circulation_items_retriever,
-    circulation_patron_exists,
     circulation_build_item_ref,
     circulation_can_be_requested,
 )
-
 
 from .permissions import (  # isort:skip
     authenticated_user_permission,
@@ -89,9 +107,21 @@ from .pidstore.pids import (  # isort:skip
     ITEM_PID_FETCHER,
     ITEM_PID_MINTER,
     ITEM_PID_TYPE,
+    EITEM_PID_FETCHER,
+    EITEM_PID_MINTER,
+    EITEM_PID_TYPE,
+    KEYWORD_PID_TYPE,
+    KEYWORD_PID_MINTER,
+    KEYWORD_PID_FETCHER,
     LOCATION_PID_FETCHER,
     LOCATION_PID_MINTER,
     LOCATION_PID_TYPE,
+    SERIES_PID_FETCHER,
+    SERIES_PID_MINTER,
+    SERIES_PID_TYPE,
+    PATRON_PID_FETCHER,
+    PATRON_PID_MINTER,
+    PATRON_PID_TYPE,
 )
 
 
@@ -244,8 +274,11 @@ DEBUG_TB_INTERCEPT_REDIRECTS = False
 _DOCID_CONVERTER = (
     'pid(docid, record_class="invenio_app_ils.records.api:Document")'
 )
-_ITEMID_CONVERTER = (
-    'pid(itemid, record_class="invenio_app_ils.records.api:Item")'
+_PITMID_CONVERTER = (
+    'pid(pitmid, record_class="invenio_app_ils.records.api:Item")'
+)
+_EITMID_CONVERTER = (
+    'pid(eitmid, record_class="invenio_app_ils.records.api:EItem")'
 )
 _LOCID_CONVERTER = (
     'pid(locid, record_class="invenio_app_ils.records.api:Location")'
@@ -253,9 +286,17 @@ _LOCID_CONVERTER = (
 _ILOCID_CONVERTER = (
     'pid(ilocid, record_class="invenio_app_ils.records.api:InternalLocation")'
 )
+_KEYID_CONVERTER = (
+    'pid(keyid, record_class="invenio_app_ils.records.api:Keyword")'
+)
+_SERID_CONVERTER = (
+    'pid(serid, record_class="invenio_app_ils.records.api:Series")'
+)
 
 # RECORDS REST
 # ============
+_RECORDS_REST_MAX_RESULT_WINDOW = 10000
+
 RECORDS_REST_ENDPOINTS = dict(
     docid=dict(
         pid_type=DOCUMENT_PID_TYPE,
@@ -285,14 +326,14 @@ RECORDS_REST_ENDPOINTS = dict(
         list_route="/documents/",
         item_route="/documents/<{0}:pid_value>".format(_DOCID_CONVERTER),
         default_media_type="application/json",
-        max_result_window=10000,
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
         error_handlers=dict(),
         read_permission_factory_imp=record_read_permission_factory,
         create_permission_factory_imp=record_create_permission_factory,
         update_permission_factory_imp=record_update_permission_factory,
         delete_permission_factory_imp=record_delete_permission_factory,
     ),
-    itemid=dict(
+    pitmid=dict(
         pid_type=ITEM_PID_TYPE,
         pid_minter=ITEM_PID_MINTER,
         pid_fetcher=ITEM_PID_FETCHER,
@@ -309,6 +350,41 @@ RECORDS_REST_ENDPOINTS = dict(
         },
         record_serializers={
             "application/json": (
+                "invenio_app_ils.records.serializers:item_v1_response"
+            ),
+        },
+        search_serializers={
+            "application/json": (
+                "invenio_app_ils.records.serializers:item_v1_search"
+            )
+        },
+        list_route="/items/",
+        item_route="/items/<{0}:pid_value>".format(_PITMID_CONVERTER),
+        default_media_type="application/json",
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
+        error_handlers=dict(),
+        read_permission_factory_imp=record_read_permission_factory,
+        create_permission_factory_imp=record_create_permission_factory,
+        update_permission_factory_imp=record_update_permission_factory,
+        delete_permission_factory_imp=record_delete_permission_factory,
+    ),
+    eitmid=dict(
+        pid_type=EITEM_PID_TYPE,
+        pid_minter=EITEM_PID_MINTER,
+        pid_fetcher=EITEM_PID_FETCHER,
+        search_class=EItemSearch,
+        record_class=EItem,
+        indexer_class=EItemIndexer,
+        record_loaders={
+            "application/json": (
+                "invenio_app_ils.records.loaders:eitem_loader"
+            ),
+            "application/json-patch+json": (
+                lambda: request.get_json(force=True)
+            ),
+        },
+        record_serializers={
+            "application/json": (
                 "invenio_app_ils.records.serializers:json_v1_response"
             ),
         },
@@ -317,10 +393,10 @@ RECORDS_REST_ENDPOINTS = dict(
                 "invenio_records_rest.serializers:json_v1_search"
             )
         },
-        list_route="/items/",
-        item_route="/items/<{0}:pid_value>".format(_ITEMID_CONVERTER),
+        list_route="/eitems/",
+        item_route="/eitems/<{0}:pid_value>".format(_EITMID_CONVERTER),
         default_media_type="application/json",
-        max_result_window=10000,
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
         error_handlers=dict(),
         read_permission_factory_imp=record_read_permission_factory,
         create_permission_factory_imp=record_create_permission_factory,
@@ -333,6 +409,7 @@ RECORDS_REST_ENDPOINTS = dict(
         pid_fetcher=LOCATION_PID_FETCHER,
         search_class=LocationSearch,
         record_class=Location,
+        indexer_class=LocationIndexer,
         record_loaders={
             "application/json": (
                 "invenio_app_ils.records.loaders:location_loader"
@@ -354,7 +431,44 @@ RECORDS_REST_ENDPOINTS = dict(
         list_route="/locations/",
         item_route="/locations/<{0}:pid_value>".format(_LOCID_CONVERTER),
         default_media_type="application/json",
-        max_result_window=10000,
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
+        error_handlers=dict(),
+        read_permission_factory_imp=record_read_permission_factory,
+        create_permission_factory_imp=record_create_permission_factory,
+        update_permission_factory_imp=record_update_permission_factory,
+        delete_permission_factory_imp=record_delete_permission_factory,
+    ),
+    serid=dict(
+        pid_type=SERIES_PID_TYPE,
+        pid_minter=SERIES_PID_MINTER,
+        pid_fetcher=SERIES_PID_FETCHER,
+        search_class=SeriesSearch,
+        record_class=Series,
+        indexer_class=SeriesIndexer,
+        record_loaders={
+            "application/json": (
+                "invenio_app_ils.records.loaders:series_loader"
+            ),
+            "application/json-patch+json": (
+                lambda: request.get_json(force=True)
+            ),
+        },
+        record_serializers={
+            "application/json": (
+                "invenio_app_ils.records.serializers:json_v1_response"
+            ),
+        },
+        search_serializers={
+            "application/json": (
+                "invenio_records_rest.serializers:json_v1_search"
+            )
+        },
+        list_route="/series/",
+        item_route="/series/<{0}:pid_value>".format(
+            _SERID_CONVERTER
+        ),
+        default_media_type="application/json",
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
         error_handlers=dict(),
         read_permission_factory_imp=record_read_permission_factory,
         create_permission_factory_imp=record_create_permission_factory,
@@ -390,32 +504,88 @@ RECORDS_REST_ENDPOINTS = dict(
             _ILOCID_CONVERTER
         ),
         default_media_type="application/json",
-        max_result_window=10000,
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
         error_handlers=dict(),
         read_permission_factory_imp=record_read_permission_factory,
         create_permission_factory_imp=record_create_permission_factory,
         update_permission_factory_imp=record_update_permission_factory,
         delete_permission_factory_imp=record_delete_permission_factory,
     ),
+    patid=dict(
+        pid_type=PATRON_PID_TYPE,
+        pid_minter=PATRON_PID_MINTER,
+        pid_fetcher=PATRON_PID_FETCHER,
+        search_class=PatronsSearch,
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_serializers={
+            "application/json": (
+                "invenio_records_rest.serializers:json_v1_search"
+            )
+        },
+        item_route='/patrons/<pid({}):pid_value>'.format(PATRON_PID_TYPE),
+        list_route="/patrons/",
+        default_media_type="application/json",
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
+        error_handlers=dict(),
+        list_permission_factory_imp=backoffice_permission,
+        read_permission_factory_imp=deny_all,
+        create_permission_factory_imp=deny_all,
+        update_permission_factory_imp=deny_all,
+        delete_permission_factory_imp=deny_all,
+    ),
+    keyid=dict(
+        pid_type=KEYWORD_PID_TYPE,
+        pid_minter=KEYWORD_PID_MINTER,
+        pid_fetcher=KEYWORD_PID_FETCHER,
+        search_class=KeywordSearch,
+        record_class=Keyword,
+        indexer_class=KeywordIndexer,
+        record_serializers={
+            'application/json': ('invenio_records_rest.serializers'
+                                 ':json_v1_response'),
+        },
+        search_serializers={
+            "application/json": (
+                "invenio_records_rest.serializers:json_v1_search"
+            )
+        },
+        item_route="/keywords/<{0}:pid_value>".format(
+            _KEYID_CONVERTER
+        ),
+        list_route="/keywords/",
+        default_media_type="application/json",
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
+        error_handlers=dict(),
+        list_permission_factory_imp=backoffice_permission,
+        read_permission_factory_imp=record_read_permission_factory,
+        create_permission_factory_imp=record_create_permission_factory,
+        update_permission_factory_imp=record_update_permission_factory,
+        delete_permission_factory_imp=backoffice_permission,
+    ),
 )
 
 # CIRCULATION
 # ===========
-CIRCULATION_ITEMS_RETRIEVER_FROM_DOCUMENT = circulation_items_retriever
+CIRCULATION_ITEMS_RETRIEVER_FROM_DOCUMENT = get_item_pids_by_document_pid
 
-CIRCULATION_DOCUMENT_RETRIEVER_FROM_ITEM = circulation_document_retriever
+CIRCULATION_DOCUMENT_RETRIEVER_FROM_ITEM = get_document_pid_by_item_pid
 
-CIRCULATION_PATRON_EXISTS = circulation_patron_exists
+CIRCULATION_PATRON_EXISTS = patron_exists
 
-CIRCULATION_ITEM_EXISTS = circulation_item_exists
+CIRCULATION_ITEM_EXISTS = item_exists
 
-CIRCULATION_ITEM_LOCATION_RETRIEVER = circulation_item_location_retriever
+CIRCULATION_DOCUMENT_EXISTS = document_exists
+
+CIRCULATION_ITEM_LOCATION_RETRIEVER = get_location_pid_by_item_pid
 
 CIRCULATION_POLICIES = dict(
     checkout=dict(
         duration_default=circulation_default_loan_duration,
         duration_validate=circulation_is_loan_duration_valid,
-        item_available=circulation_is_item_available
+        item_can_circulate=can_item_circulate,
     ),
     extension=dict(
         from_end_date=True,
@@ -490,9 +660,9 @@ CIRCULATION_REST_ENDPOINTS = dict(
         pid_type=CIRCULATION_LOAN_PID_TYPE,
         pid_minter=CIRCULATION_LOAN_MINTER,
         pid_fetcher=CIRCULATION_LOAN_FETCHER,
-        search_class=LoansSearch,
+        search_class=IlsLoansSearch,
         search_factory_imp="invenio_app_ils.circulation.search"
-        ":circulation_search_factory",
+                           ":circulation_search_factory",
         record_class="invenio_circulation.api:Loan",
         indexer_class=LoanIndexer,
         record_serializers={
@@ -511,7 +681,7 @@ CIRCULATION_REST_ENDPOINTS = dict(
         ),
         default_media_type="application/json",
         links_factory_imp="invenio_circulation.links:loan_links_factory",
-        max_result_window=10000,
+        max_result_window=_RECORDS_REST_MAX_RESULT_WINDOW,
         error_handlers=dict(),
         read_permission_factory_imp=LoanOwnerPermission,
         create_permission_factory_imp=backoffice_permission,
@@ -524,6 +694,46 @@ CIRCULATION_REST_ENDPOINTS = dict(
 # RECORDS REST sort options
 # =========================
 RECORDS_REST_SORT_OPTIONS = dict(
+    documents=dict(  # DocumentSearch.Meta.index
+        mostrecent=dict(
+            fields=['_updated'],
+            title='Newest',
+            default_order='asc',
+            order=1
+        ),
+        bestmatch=dict(
+            fields=['-_score'],
+            title='Best match',
+            default_order='asc',
+            order=2
+        ),
+        available_items=dict(
+            fields=['circulation.has_items_for_loan'],
+            title='Available Items',
+            default_order='desc',
+            order=3
+        ),
+        mostloaned=dict(
+            fields=['circulation.number_of_past_loans'],
+            title='Most loaned',
+            default_order='desc',
+            order=4
+        )
+    ),
+    eitems=dict(  # ItemSearch.Meta.index
+        bestmatch=dict(
+            fields=['-_score'],
+            title='Best match',
+            default_order='asc',
+            order=2
+        ),
+        mostrecent=dict(
+            fields=['_updated'],
+            title='Newest',
+            default_order='asc',
+            order=1
+        )
+    ),
     items=dict(  # ItemSearch.Meta.index
         bestmatch=dict(
             fields=['-_score'],
@@ -538,7 +748,21 @@ RECORDS_REST_SORT_OPTIONS = dict(
             order=1
         )
     ),
-    loans=dict(  # LoansSearch.Meta.index
+    loans=dict(  # IlsLoansSearch.Meta.index
+        bestmatch=dict(
+            fields=['-_score'],
+            title='Best match',
+            default_order='asc',
+            order=2
+        ),
+        mostrecent=dict(
+            fields=['_updated'],
+            title='Newest',
+            default_order='asc',
+            order=1
+        )
+    ),
+    series=dict(  # SeriesSearch.Meta.index
         bestmatch=dict(
             fields=['-_score'],
             title='Best match',
@@ -556,7 +780,76 @@ RECORDS_REST_SORT_OPTIONS = dict(
 
 # RECORDS REST facets
 # =========================
+#: Number of keywords to display in the DocumentsSearch facet
+FACET_KEYWORD_LIMIT = 5
+
 RECORDS_REST_FACETS = dict(
+    documents=dict(  # DocumentSearch.Meta.index
+        aggs=dict(
+            keywords=dict(
+                terms=dict(field="keywords.name", size=FACET_KEYWORD_LIMIT),
+            ),
+            languages=dict(
+                terms=dict(field="languages")
+            ),
+            document_types=dict(
+                terms=dict(field="document_types")
+            ),
+            moi=dict(
+                terms=dict(field="series.mode_of_issuance")
+            ),
+            has_items=dict(
+                range=dict(
+                    field="circulation.has_items",
+                    ranges=[
+                        {"key": "printed versions", "from": 1},
+                    ]
+                ),
+            ),
+            has_eitems=dict(
+                range=dict(
+                    field="circulation.has_eitems",
+                    ranges=[
+                        {"key": "electronic versions", "from": 1},
+                    ]
+                )
+            ),
+            has_items_for_loan=dict(
+                range=dict(
+                    field="circulation.has_items_for_loan",
+                    ranges=[
+                        {"key": "printed versions available", "from": 1},
+                    ],
+                )
+            ),
+        ),
+        filters=dict(
+            document_types=terms_filter("document_types"),
+            languages=terms_filter("languages"),
+            keywords=terms_filter("keywords.name"),
+            has_items=keyed_range_filter(
+                "circulation.has_items",
+                {
+                    "printed versions": {"gt": 0},
+                },
+            ),
+            has_eitems=keyed_range_filter(
+                "circulation.has_eitems",
+                {
+                    "electronic versions": {"gt": 0},
+                },
+            ),
+            has_items_for_loan=keyed_range_filter(
+                "circulation.has_items_for_loan",
+                {
+                    "printed versions available": {"gt": 0},
+                },
+            ),
+        ),
+        post_filters=dict(
+            moi=terms_filter("series.mode_of_issuance"),
+        ),
+    ),
     items=dict(  # ItemSearch.Meta.index
         aggs=dict(
             status=dict(
@@ -569,7 +862,9 @@ RECORDS_REST_FACETS = dict(
             #     terms=dict(field="internal_location.name"),
             # ),
             circulation_status=dict(
-                terms=dict(field="circulation_status.state"),
+                terms=dict(field="circulation_status.state",
+                           missing="N/A",
+                           ),
             ),
         ),
         filters=dict(
@@ -579,7 +874,7 @@ RECORDS_REST_FACETS = dict(
             circulation_status=terms_filter('circulation_status.state'),
         )
     ),
-    loans=dict(  # LoansSearch.Meta.index
+    loans=dict(  # IlsLoansSearch.Meta.index
         aggs=dict(
             state=dict(
                 terms=dict(field="state"),
@@ -588,12 +883,28 @@ RECORDS_REST_FACETS = dict(
         filters=dict(
             state=terms_filter('state'),
         )
-    )
+    ),
+    series=dict(  # SeriesSearch.Meta.index
+        aggs=dict(
+            moi=dict(
+                terms=dict(field="mode_of_issuance")
+            ),
+            keywords=dict(
+                terms=dict(field="keywords.name", size=FACET_KEYWORD_LIMIT),
+            ),
+            languages=dict(
+                terms=dict(field='languages')
+            ),
+        ),
+        filters=dict(
+            languages=terms_filter('languages'),
+            keywords=terms_filter("keywords.name"),
+        ),
+        post_filters=dict(
+            moi=terms_filter("mode_of_issuance"),
+        ),
+    ),
 )
-
-# PIDSTORE
-# =========================
-PIDSTORE_RECID_FIELD = Item.pid_field
 
 # ILS
 # ===
@@ -641,11 +952,13 @@ RECORDS_EDITOR_UI_CONFIG = {
         },
         "editorConfig": {
             "schemaOptions": {
-                "alwaysShow": ["title", "abstracts", "authors"],
+                "alwaysShow": ["title", "abstracts", "authors", "series_objs"],
                 "properties": {
                     "$schema": {"hidden": True},
                     "document_pid": {"hidden": True},
                     "circulation": {"hidden": True},
+                    "keywords": {"hidden": True},
+                    "series": {"hidden": True},
                 },
             },
         },
@@ -693,6 +1006,67 @@ RECORDS_EDITOR_UI_CONFIG = {
             },
         },
     },
+    "series": {
+        "recordConfig": {
+            "apiUrl": "api/series/",
+            "schema": "series/series-v1.0.0.json",
+        },
+        "editorConfig": {
+            "schemaOptions": {
+                "alwaysShow": [
+                    "mode_of_issuance",
+                    "title",
+                    "abstracts",
+                    "authors"
+                ],
+                "properties": {
+                    "$schema": {"hidden": True},
+                    "series_pid": {"hidden": True},
+                    "keywords": {"hidden": True},
+                },
+            },
+        },
+    },
+    "eitems": {
+        "recordConfig": {
+            "apiUrl": "api/eitems/",
+            "schema": "eitems/eitem-v1.0.0.json",
+        },
+        "editorConfig": {
+            "schemaOptions": {
+                "alwaysShow": [
+                    "description",
+                    "document_pid",
+                    "internal_notes",
+                    "open_access",
+                    "urls",
+                ],
+                "properties": {
+                    "$schema": {"hidden": True},
+                    "eitem_pid": {"hidden": True},
+                    "document": {"hidden": True},
+                },
+            },
+        },
+    },
+    "keywords": {
+        "recordConfig": {
+            "apiUrl": "api/keywords/",
+            "schema": "keywords/keyword-v1.0.0.json",
+        },
+        "editorConfig": {
+            "schemaOptions": {
+                "alwaysShow": [
+                    "name",
+                    "provenance"
+                ],
+                "properties": {
+                    "$schema": {"hidden": True},
+                    "keyword_pid": {"hidden": True},
+                },
+            },
+        },
+    },
 }
 
 # Accounts REST
@@ -708,3 +1082,27 @@ ACCOUNTS_REST_READ_USERS_LIST_PERMISSION_FACTORY = backoffice_permission
 
 ACCOUNTS_JWT_CREATION_FACTORY = ils_jwt_create_token
 """ILS Jwt creation factory"""
+
+# PID Relations
+# ==============
+LANGUAGE_RELATION = RelationType(
+    0, "language", "Language",
+    "invenio_app_ils.records.related.nodes:PIDNodeRelated",
+    "invenio_pidrelations.serializers.schemas.RelationSchema"
+)
+EDITION_RELATION = RelationType(
+    1, "edition", "Edition",
+    "invenio_app_ils.records.related.nodes:PIDNodeRelated",
+    "invenio_pidrelations.serializers.schemas.RelationSchema"
+)
+OTHER_RELATION = RelationType(
+    2, "other", "Other",
+    "invenio_app_ils.records.related.nodes:PIDNodeRelated",
+    "invenio_pidrelations.serializers.schemas.RelationSchema"
+)
+
+PIDRELATIONS_RELATION_TYPES = [
+    LANGUAGE_RELATION,
+    EDITION_RELATION,
+    OTHER_RELATION,
+]

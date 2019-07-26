@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Loader, Error } from '../../../../../../common/components';
 import { RecordsBriefCard } from '../../../../components/statistics/RecordsBriefCard';
 import { NewButton, SeeAllButton } from '../../../../components/buttons';
+import { goToHandler } from '../../../../../../history';
 
 export default class ACQRequestsCard extends Component {
   constructor(props) {
@@ -15,44 +16,35 @@ export default class ACQRequestsCard extends Component {
 
   componentDidMount() {}
 
-  _seeAllButton = () => {
+  seeAllButton = () => {
     return (
-      <SeeAllButton
-        fluid
-        disabled
-        clickHandler={() => this.props.history.push(this.seeAllUrl)}
-      />
+      <SeeAllButton fluid disabled clickHandler={goToHandler(this.seeAllUrl)} />
     );
   };
 
-  _newAcqButton = () => {
+  newAcqButton = () => {
     return (
-      <NewButton
-        fluid
-        disabled
-        clickHandler={() => this.props.history.push(this.newAcqURL)}
-      />
+      <NewButton fluid disabled clickHandler={goToHandler(this.newAcqURL)} />
     );
   };
 
-  _render_card = data => {
+  renderCard = data => {
     return (
       <RecordsBriefCard
         title={'ACQ Requests'}
         stats={data}
         text={'ongoing'}
-        buttonLeft={this._newAcqButton()}
-        buttonRight={this._seeAllButton()}
+        buttonLeft={this.newAcqButton()}
+        buttonRight={this.seeAllButton()}
       />
     );
   };
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._render_card(data)}</Error>
+        <Error error={error}>{this.renderCard(data)}</Error>
       </Loader>
     );
   }

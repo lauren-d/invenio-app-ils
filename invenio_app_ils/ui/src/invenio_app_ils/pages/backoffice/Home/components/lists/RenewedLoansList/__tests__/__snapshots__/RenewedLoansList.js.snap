@@ -2,13 +2,13 @@
 
 exports[`RenewedLoansList tests should load the details component 1`] = `
 <Loader>
-  <Error
-    error={null}
-  >
+  <Error>
     <ResultsTable
       fixed={false}
       headerActionClickHandler={null}
       headerActionComponent={null}
+      name="frequently renewed loans"
+      renderSegment={true}
       rowActionClickHandler={[Function]}
       rows={Array []}
       seeAllComponent={
@@ -34,18 +34,26 @@ exports[`RenewedLoansList tests should render loans 1`] = `
       "hits": Array [
         Object {
           "created": "2018-01-01T10:05:00.000Z",
-          "end_date": "2018-01-01T10:05:00.000Z",
+          "id": 1,
           "loan_pid": "loan1",
-          "patron_pid": "patron_1",
-          "start_date": "2018-01-01T10:05:00.000Z",
+          "metadata": Object {
+            "end_date": "2018-01-01T10:05:00.000Z",
+            "loan_pid": "loan1",
+            "patron_pid": "patron_1",
+            "start_date": "2018-01-01T10:05:00.000Z",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
         Object {
           "created": "2018-01-01T10:05:00.000Z",
-          "end_date": "2018-01-01T10:05:00.000Z",
+          "id": 2,
           "loan_pid": "loan2",
-          "patron_pid": "patron_2",
-          "start_date": "2018-01-01T10:05:00.000Z",
+          "metadata": Object {
+            "end_date": "2018-01-01T10:05:00.000Z",
+            "loan_pid": "loan2",
+            "patron_pid": "patron_2",
+            "start_date": "2018-01-01T10:05:00.000Z",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
       ],
@@ -53,30 +61,31 @@ exports[`RenewedLoansList tests should render loans 1`] = `
     }
   }
   fetchRenewedLoans={[Function]}
-  history={[Function]}
   showMaxEntries={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="frequently renewed loans"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={
           Array [
             Object {
+              "End date": "2018-01-01",
               "ID": "loan1",
-              "Last update": "2018-01-01",
+              "Item barcode": null,
               "Patron ID": "patron_1",
               "Renewals": undefined,
               "State": undefined,
             },
             Object {
+              "End date": "2018-01-01",
               "ID": "loan2",
-              "Last update": "2018-01-01",
+              "Item barcode": null,
               "Patron ID": "patron_2",
               "Renewals": undefined,
               "State": undefined,
@@ -162,7 +171,8 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                       "ID",
                       "Patron ID",
                       "State",
-                      "Last update",
+                      "Item barcode",
+                      "End date",
                       "Renewals",
                     ]
                   }
@@ -248,7 +258,7 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="Last update"
+                            key="Item barcode"
                           >
                             <TableCell
                               as="th"
@@ -257,7 +267,22 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                               <th
                                 className=""
                               >
-                                Last update
+                                Item barcode
+                              </th>
+                            </TableCell>
+                          </TableHeaderCell>
+                          <TableHeaderCell
+                            as="th"
+                            key="End date"
+                          >
+                            <TableCell
+                              as="th"
+                              className=""
+                            >
+                              <th
+                                className=""
+                              >
+                                End date
                               </th>
                             </TableCell>
                           </TableHeaderCell>
@@ -287,7 +312,8 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                       "ID",
                       "Patron ID",
                       "State",
-                      "Last update",
+                      "Item barcode",
+                      "End date",
                       "Renewals",
                     ]
                   }
@@ -295,15 +321,17 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                   rows={
                     Array [
                       Object {
+                        "End date": "2018-01-01",
                         "ID": "loan1",
-                        "Last update": "2018-01-01",
+                        "Item barcode": null,
                         "Patron ID": "patron_1",
                         "Renewals": undefined,
                         "State": undefined,
                       },
                       Object {
+                        "End date": "2018-01-01",
                         "ID": "loan2",
-                        "Last update": "2018-01-01",
+                        "Item barcode": null,
                         "Patron ID": "patron_2",
                         "Renewals": undefined,
                         "State": undefined,
@@ -398,12 +426,24 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Last update-loan1"
+                            data-test="Item barcode-loan1"
                             key="3-loan1"
                           >
                             <td
                               className=""
-                              data-test="Last update-loan1"
+                              data-test="Item barcode-loan1"
+                            >
+                              -
+                            </td>
+                          </TableCell>
+                          <TableCell
+                            as="td"
+                            data-test="End date-loan1"
+                            key="4-loan1"
+                          >
+                            <td
+                              className=""
+                              data-test="End date-loan1"
                             >
                               2018-01-01
                             </td>
@@ -411,7 +451,7 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                           <TableCell
                             as="td"
                             data-test="Renewals-loan1"
-                            key="4-loan1"
+                            key="5-loan1"
                           >
                             <td
                               className=""
@@ -503,12 +543,24 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Last update-loan2"
+                            data-test="Item barcode-loan2"
                             key="3-loan2"
                           >
                             <td
                               className=""
-                              data-test="Last update-loan2"
+                              data-test="Item barcode-loan2"
+                            >
+                              -
+                            </td>
+                          </TableCell>
+                          <TableCell
+                            as="td"
+                            data-test="End date-loan2"
+                            key="4-loan2"
+                          >
+                            <td
+                              className=""
+                              data-test="End date-loan2"
                             >
                               2018-01-01
                             </td>
@@ -516,7 +568,7 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                           <TableCell
                             as="td"
                             data-test="Renewals-loan2"
-                            key="4-loan2"
+                            key="5-loan2"
                           >
                             <td
                               className=""
@@ -532,7 +584,7 @@ exports[`RenewedLoansList tests should render loans 1`] = `
                 </ResultsTableBody>
                 <ResultsTableFooter
                   allRowsNumber={2}
-                  columnsNumber={5}
+                  columnsNumber={6}
                   seeAllComponent={
                     <SeeAllButton
                       clickHandler={[Function]}
@@ -561,17 +613,16 @@ exports[`RenewedLoansList tests should render show a message with no loans 1`] =
     }
   }
   fetchRenewedLoans={[Function]}
-  history={[Function]}
   showMaxEntries={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={false}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="frequently renewed loans"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={Array []}
         seeAllComponent={
@@ -647,6 +698,8 @@ exports[`RenewedLoansList tests should render show a message with no loans 1`] =
                 data-test="no-results"
               >
                 There are no 
+                frequently renewed loans
+                .
               </div>
             </Message>
           </div>

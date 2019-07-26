@@ -2,15 +2,14 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { Settings } from 'luxon';
 import { fromISO } from '../../../../../../../common/api/date';
-import {
-  BackOfficeURLS,
-  viewLoanDetailsUrl,
-} from '../../../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../../../routes/urls';
 import OverbookedDocumentsList from '../OverbookedDocumentsList';
-import { generatePath } from 'react-router-dom';
+import history from '../../../../../../../history';
+
+jest.mock('../../../../../../../common/config');
 
 Settings.defaultZoneName = 'utc';
-const d = fromISO('2018-01-01T11:05:00+01:00');
+const stringDate = fromISO('2018-01-01T11:05:00+01:00');
 
 describe('OverbookedDocumentsList tests', () => {
   let component;
@@ -23,7 +22,6 @@ describe('OverbookedDocumentsList tests', () => {
   it('should load the details component', () => {
     const component = shallow(
       <OverbookedDocumentsList
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchOverbookedDocuments={() => {}}
       />
@@ -35,7 +33,6 @@ describe('OverbookedDocumentsList tests', () => {
     const mockedFetchLoans = jest.fn();
     component = mount(
       <OverbookedDocumentsList
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchOverbookedDocuments={mockedFetchLoans}
       />
@@ -46,7 +43,6 @@ describe('OverbookedDocumentsList tests', () => {
   it('should render show a message with no documents', () => {
     component = mount(
       <OverbookedDocumentsList
-        history={() => {}}
         data={{ hits: [], total: 0 }}
         fetchOverbookedDocuments={() => {}}
       />
@@ -63,22 +59,30 @@ describe('OverbookedDocumentsList tests', () => {
     const data = {
       hits: [
         {
-          ID: 'doc1',
+          id: 1,
+          updated: stringDate,
+          created: stringDate,
           document_pid: 'doc1',
-          updated: d,
-          created: d,
-          title: 'X',
-          circulation: {
-            pendingLoans: 1,
-            loanableItems: 2,
+          metadata: {
+            title: 'X',
+            authors: ['Author1'],
+            abstracts: 'This is an abstract',
+            circulation: {
+              pending_loans: 1,
+              has_items_for_loan: 2,
+            },
           },
         },
         {
-          ID: 'doc2',
+          id: 2,
+          updated: stringDate,
+          created: stringDate,
           document_pid: 'doc2',
-          updated: d,
-          created: d,
-          title: 'X',
+          metadata: {
+            title: 'X',
+            authors: ['Author1'],
+            abstracts: 'This is an abstract',
+          },
         },
       ],
       total: 2,
@@ -86,7 +90,6 @@ describe('OverbookedDocumentsList tests', () => {
 
     component = mount(
       <OverbookedDocumentsList
-        history={() => {}}
         data={data}
         fetchOverbookedDocuments={() => {}}
       />
@@ -110,18 +113,19 @@ describe('OverbookedDocumentsList tests', () => {
 
   it('should go to loan details when clicking on a document', () => {
     const mockedHistoryPush = jest.fn();
-    const historyFn = {
-      push: mockedHistoryPush,
-    };
-
+    history.push = mockedHistoryPush;
     const data = {
       hits: [
         {
-          ID: 'doc1',
-          document_pid: 'doc1',
-          updated: d,
-          created: d,
-          title: 'X',
+          id: 2,
+          updated: stringDate,
+          created: stringDate,
+          document_pid: 'doc2',
+          metadata: {
+            title: 'X',
+            authors: ['Author1'],
+            abstracts: 'This is an abstract',
+          },
         },
       ],
       total: 1,
@@ -129,7 +133,6 @@ describe('OverbookedDocumentsList tests', () => {
 
     component = mount(
       <OverbookedDocumentsList
-        history={historyFn}
         data={data}
         fetchOverbookedDocuments={() => {}}
         showMaxEntries={1}
@@ -143,9 +146,7 @@ describe('OverbookedDocumentsList tests', () => {
       .find('i');
     button.simulate('click');
 
-    const expectedParam = generatePath(BackOfficeURLS.documentDetails, {
-      documentPid: firstId,
-    });
-    expect(mockedHistoryPush).toHaveBeenCalledWith(expectedParam);
+    const expectedParam = BackOfficeRoutes.documentDetailsFor(firstId);
+    expect(mockedHistoryPush).toHaveBeenCalledWith(expectedParam, {});
   });
 });

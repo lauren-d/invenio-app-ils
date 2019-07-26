@@ -1,7 +1,7 @@
 [
   {
     "item_pid": "itemid-1",
-    "barcode": "123456789",
+    "barcode": "123456789-1",
     "title": "The Gulf: The Making of An American Sea - Item 1",
     "document_pid": "docid-1",
     "internal_location_pid": "ilocid-1",
@@ -11,57 +11,57 @@
   },
   {
     "item_pid": "itemid-2",
-    "barcode": "12345678910",
+    "barcode": "123456789-2",
     "title": "The Gulf: The Making of An American Sea - Item 2",
     "document_pid": "docid-1",
     "internal_location_pid": "ilocid-2",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE"
+    "status": "CAN_CIRCULATE"
   },
   {
     "item_pid": "itemid-3",
-    "barcode": "12345678911",
+    "barcode": "123456789-3",
     "title": "Prairie Fires: The American Dreams of Laura Ingalls Wilder",
     "document_pid": "docid-2",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE"
+    "status": "CAN_CIRCULATE"
   },
   {
     "item_pid": "itemid-4",
-    "barcode": "12345678912",
+    "barcode": "123456789-4",
     "title": "Half-light: Collected Poems 1965-2016",
     "document_pid": "docid-3",
     "internal_location_pid": "ilocid-2",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE"
+    "status": "CAN_CIRCULATE"
   },
   {
     "item_pid": "itemid-5",
-    "barcode": "12345678913",
+    "barcode": "123456789-5",
     "title": "Half-light: Collected Poems 1965-2016",
     "document_pid": "docid-3",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE"
+    "status": "CAN_CIRCULATE"
   },
   {
     "item_pid": "itemid-6",
-    "barcode": "12345678914",
+    "barcode": "123456789-6",
     "title": "Half-light: Collected Poems 1965-2016",
     "document_pid": "docid-3",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE"
+    "status": "CAN_CIRCULATE"
   },
   {
     "item_pid": "itemid-7",
-    "barcode": "12345678915",
+    "barcode": "123456789-7",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-2",
@@ -71,7 +71,7 @@
   },
   {
     "item_pid": "itemid-8",
-    "barcode": "12345678916",
+    "barcode": "123456789-8",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-1",
@@ -80,88 +80,108 @@
     "status": "MISSING"
   },
   {
-    "item_pid": "itemid-917",
-    "barcode": "123456789",
+    "item_pid": "itemid-9",
+    "barcode": "123456789-9",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE"
+    "status": "CAN_CIRCULATE"
   },
   {
     "item_pid": "itemid-10",
-    "barcode": "12345678918",
+    "barcode": "123456789-10",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE"
+    "status": "CAN_CIRCULATE"
   },
   {
     "item_pid": "itemid-50",
-    "barcode": "12345678918",
+    "barcode": "123456789-50",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE",
+    "status": "CAN_CIRCULATE",
     "_access": { "update": [1] }
   },
   {
     "item_pid": "itemid-51",
-    "barcode": "12345678918",
+    "barcode": "123456789-51",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-2",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE",
+    "status": "CAN_CIRCULATE",
     "_access": { "delete": ["librarian"] }
   },
   {
     "item_pid": "itemid-52",
-    "barcode": "12345678918",
+    "barcode": "123456789-52",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE",
+    "status": "CAN_CIRCULATE",
     "_access": { "delete": ["1"] }
   },
   {
     "item_pid": "itemid-53",
-    "barcode": "12345678918",
+    "barcode": "123456789-53",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE",
+    "status": "CAN_CIRCULATE",
     "_access": { "update": ["1"] }
   },
   {
     "item_pid": "itemid-54",
-    "barcode": "12345678918",
+    "barcode": "123456789-54",
     "title": "Less: A Novel",
     "document_pid": "docid-5",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
-    "status": "LOANABLE",
+    "status": "CAN_CIRCULATE",
     "_access": { "read": ["1"] }
   },
   {
     "item_pid": "itemid-55",
-    "barcode": "123456789",
+    "barcode": "123456789-55",
     "title": "The Gulf: The Making of An American Sea - Item 1",
     "document_pid": "docid-1",
     "internal_location_pid": "ilocid-1",
     "circulation_restriction": "NO_RESTRICTION",
     "medium": "NOT_SPECIFIED",
     "status": "MISSING"
+  },
+  {
+    "item_pid": "itemid-56",
+    "barcode": "123456789-54",
+    "title": "Less: A Novel",
+    "document_pid": "docid-5",
+    "internal_location_pid": "ilocid-1",
+    "circulation_restriction": "NO_RESTRICTION",
+    "medium": "NOT_SPECIFIED",
+    "status": "CAN_CIRCULATE"
+  },
+  {
+    "item_pid": "itemid-57",
+    "barcode": "123456789-55",
+    "title": "The Gulf: The Making of An American Sea - Item 1",
+    "document_pid": "docid-1",
+    "internal_location_pid": "ilocid-1",
+    "circulation_restriction": "NO_RESTRICTION",
+    "medium": "NOT_SPECIFIED",
+    "status": "CAN_CIRCULATE"
   }
 ]

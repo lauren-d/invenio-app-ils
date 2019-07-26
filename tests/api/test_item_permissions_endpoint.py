@@ -5,7 +5,7 @@
 # invenio-app-ils is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-"""Test accesibility of resource endpoints."""
+"""Test accessibility of resource endpoints."""
 
 from __future__ import unicode_literals
 
@@ -63,7 +63,7 @@ def test_get_item_endpoint(
 ):
     """Test GET permissions."""
     user_login(user_id, client, users)
-    url = url_for("invenio_records_rest.itemid_item", pid_value=res_id)
+    url = url_for("invenio_records_rest.pitmid_item", pid_value=res_id)
     _test_response(client, "get", url, json_headers, None, expected_resp_code)
 
 
@@ -82,7 +82,7 @@ def test_post_item_endpoint(
 ):
     """Test POST permissions of an item."""
     user_login(user_id, client, users)
-    url = url_for("invenio_records_rest.itemid_list")
+    url = url_for("invenio_records_rest.pitmid_list")
     ITEM = copy.deepcopy(item_record)
     if "item_pid" in ITEM:
         del ITEM["item_pid"]
@@ -120,7 +120,7 @@ def test_put_item_endpoint(
     item_record,
 ):
     """Test PUT permissions of an item."""
-    url = url_for("invenio_records_rest.itemid_item", pid_value=res_id)
+    url = url_for("invenio_records_rest.pitmid_item", pid_value=res_id)
     user_login(user_id, client, users)
     ITEM = copy.deepcopy(item_record)
     res = _test_response(
@@ -156,8 +156,8 @@ def test_patch_item_endpoint(
     expected_resp_code,
 ):
     """Test PATCH permission of an item."""
-    patch = [{"op": "replace", "path": "/status", "value": "LOANABLE"}]
-    url = url_for("invenio_records_rest.itemid_item", pid_value=res_id)
+    patch = [{"op": "replace", "path": "/status", "value": "CAN_CIRCULATE"}]
+    url = url_for("invenio_records_rest.pitmid_item", pid_value=res_id)
     user_login(user_id, client, users)
     res = _test_response(
         client,
@@ -167,7 +167,7 @@ def test_patch_item_endpoint(
         data=patch,
         expected_resp_code=expected_resp_code,
     )
-    _test_data("status", "LOANABLE", res)
+    _test_data("status", "CAN_CIRCULATE", res)
 
 
 @pytest.mark.parametrize(
@@ -195,7 +195,7 @@ def test_delete_item_endpoint(
 ):
     """Test DELETE permissions of an item."""
     user_login(user_id, client, users)
-    url = url_for("invenio_records_rest.itemid_item", pid_value=res_id)
+    url = url_for("invenio_records_rest.pitmid_item", pid_value=res_id)
     _test_response(
         client,
         "delete",
@@ -204,3 +204,41 @@ def test_delete_item_endpoint(
         data=item_record,
         expected_resp_code=expected_resp_code,
     )
+
+
+@pytest.mark.parametrize(
+    "user_id,res_id,expected_resp_code,filtered",
+    [
+        ("patron1", "itemid-56", 200, False),
+        ("patron2", "itemid-56", 200, True),
+        ("patron1", "itemid-57", 200, True),
+        ("patron2", "itemid-57", 200, False),
+        ("librarian", "itemid-56", 200, False),
+        ("admin", "itemid-57", 200, False),
+    ]
+)
+def test_item_circulation_status(client, json_headers, testdata, users,
+                                 user_id, res_id, expected_resp_code,
+                                 filtered):
+    """Test item circulation_status filtering."""
+    user_login(user_id, client, users)
+    url = url_for("invenio_records_rest.pitmid_item", pid_value=res_id)
+    res = _test_response(
+        client,
+        "get",
+        url,
+        json_headers,
+        None,
+        expected_resp_code
+    )
+    circulation_status = res.json["metadata"]["circulation_status"]
+    filter_keys = [
+        "loan_pid",
+        "patron_pid",
+    ]
+    if filtered:
+        for key in filter_keys:
+            assert key not in circulation_status
+    else:
+        for key in filter_keys:
+            assert key in circulation_status

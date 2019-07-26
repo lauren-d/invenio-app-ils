@@ -18,6 +18,7 @@ exports[`ResultsTable tests should load the ResultTable component 1`] = `
     data-test="no-results"
   >
     There are no 
+    .
   </Message>
 </Segment>
 `;
@@ -27,7 +28,7 @@ exports[`ResultsTable tests should not render the see all button when showing on
   fixed={false}
   headerActionClickHandler={null}
   headerActionComponent={null}
-  history={[Function]}
+  renderSegment={true}
   rowActionClickHandler={[Function]}
   rows={
     Array [
@@ -485,7 +486,7 @@ exports[`ResultsTable tests should render the see all button when showing only a
   fixed={false}
   headerActionClickHandler={null}
   headerActionComponent={null}
-  history={[Function]}
+  renderSegment={true}
   rowActionClickHandler={[Function]}
   rows={
     Array [

@@ -16,8 +16,97 @@
         "abstracts": {
           "type": "keyword"
         },
+        "document_types": {
+          "type": "keyword"
+        },
+        "languages": {
+          "type": "keyword"
+        },
         "items": {
           "type": "keyword"
+        },
+        "keywords": {
+          "type": "object",
+          "properties": {
+            "keyword_pid": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "provenance": {
+              "type": "keyword"
+            }
+          }
+        },
+        "series": {
+          "type": "object",
+          "properties": {
+            "series_pid": {
+              "type": "keyword"
+            },
+            "issn": {
+              "type": "keyword"
+            },
+            "mode_of_issuance": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "volume": {
+              "type": "keyword"
+            }
+          }
+        },
+        "related_records": {
+          "type": "object",
+          "properties": {
+            "pid": {
+              "type": "keyword"
+            },
+            "pid_type": {
+              "type": "keyword"
+            },
+            "relation_type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "_access": {
+          "type": "object",
+          "properties": {
+            "read": {
+              "type": "keyword"
+            }
+          }
+        },
+        "_computed": {
+          "type": "object",
+          "properties": {
+            "eitems": {
+              "type": "object",
+              "properties": {
+                "eitem_pid": {
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "text"
+                },
+                "internal_notes": {
+                  "type": "text"
+                },
+                "open_access": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
         },
         "_created": {
           "type": "date"

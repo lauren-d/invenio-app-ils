@@ -4,6 +4,7 @@ import * as actions from '../actions';
 import { initialState } from '../reducer';
 import * as types from '../types';
 import { loan as loanApi } from '../../../../../common/api';
+import { sessionManager } from '../../../../../authentication/services';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
@@ -12,7 +13,6 @@ const mockGet = jest.fn();
 loanApi.get = mockGet;
 const mockPostAction = jest.fn();
 loanApi.postAction = mockPostAction;
-import { sessionManager } from '../../../../../authentication/services';
 
 sessionManager.user = { id: '2', locationPid: '2' };
 
@@ -102,7 +102,7 @@ describe('Loan details tests', () => {
 
       const expectedActions = [
         {
-          type: types.ACTION_IS_LOADING,
+          type: types.IS_LOADING,
         },
       ];
 
@@ -114,7 +114,8 @@ describe('Loan details tests', () => {
             '123',
             loan,
             sessionManager.user.id,
-            sessionManager.user.locationPid
+            sessionManager.user.locationPid,
+            {}
           );
           const actions = store.getActions();
           expect(actions[0]).toEqual(expectedActions[0]);
@@ -127,7 +128,7 @@ describe('Loan details tests', () => {
 
       const expectedActions = [
         {
-          type: types.ACTION_SUCCESS,
+          type: types.SUCCESS,
           payload: response.data,
         },
       ];
@@ -140,7 +141,8 @@ describe('Loan details tests', () => {
             '123',
             loan,
             sessionManager.user.id,
-            sessionManager.user.locationPid
+            sessionManager.user.locationPid,
+            {}
           );
           const actions = store.getActions();
           expect(actions[1]).toEqual(expectedActions[0]);
@@ -153,7 +155,7 @@ describe('Loan details tests', () => {
 
       const expectedActions = [
         {
-          type: types.ACTION_HAS_ERROR,
+          type: types.HAS_ERROR,
           payload: [500, 'Error'],
         },
       ];
@@ -166,7 +168,8 @@ describe('Loan details tests', () => {
             '123',
             loan,
             sessionManager.user.id,
-            sessionManager.user.locationPid
+            sessionManager.user.locationPid,
+            {}
           );
           const actions = store.getActions();
           expect(actions[1]).toEqual(expectedActions[0]);

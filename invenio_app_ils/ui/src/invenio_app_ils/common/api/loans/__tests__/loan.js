@@ -68,7 +68,6 @@ describe('Loan query builder tests', () => {
   });
 
   it('should build query for update date range', () => {
-    let now = toShortDate(DateTime.local());
     let date = { from: '2019-02-01', to: '2019-03-01' };
     const query = loanApi
       .query()
@@ -76,6 +75,15 @@ describe('Loan query builder tests', () => {
       .qs();
     expect(decodeURI(query)).toEqual(`(_updated:{${date.from} TO ${date.to}})`);
   });
-});
 
-describe('Loan list url request test', () => {});
+  it('should build query for start_date date range', () => {
+    let date = { fromDate: '2019-02-01', toDate: '2019-03-01' };
+    const query = loanApi
+      .query()
+      .withStartDate(date)
+      .qs();
+    expect(decodeURI(query)).toEqual(
+      `(start_date:{${date.fromDate} TO ${date.toDate}})`
+    );
+  });
+});

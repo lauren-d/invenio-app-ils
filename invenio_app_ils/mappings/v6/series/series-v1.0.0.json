@@ -1,0 +1,61 @@
+{
+  "mappings": {
+    "series-v1.0.0": {
+      "date_detection": false,
+      "numeric_detection": false,
+      "properties": {
+        "$schema": {
+          "type": "keyword"
+        },
+        "authors": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "abstracts": {
+          "type": "text"
+        },
+        "issn": {
+          "type": "keyword"
+        },
+        "mode_of_issuance": {
+          "type": "keyword"
+        },
+        "languages": {
+          "type": "keyword"
+        },
+        "related_records": {
+          "type": "object",
+          "properties": {
+            "pid": {
+              "type": "keyword"
+            },
+            "pid_type": {
+              "type": "keyword"
+            },
+            "relation_type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "title": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "keyword"
+            }
+          }
+        },
+        "_created": {
+          "type": "date"
+        },
+        "_updated": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}

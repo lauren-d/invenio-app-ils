@@ -10,20 +10,18 @@
 from __future__ import absolute_import, print_function
 
 from flask import current_app
-from invenio_circulation.errors import CirculationException
 from invenio_circulation.signals import loan_replace_item, loan_state_changed
 
-from ..proxies import current_app_ils_extension
-from ..records.api import Item
-from .mail.factory import loan_message_factory
-from .mail.tasks import send_ils_mail
+from invenio_app_ils.circulation.mail.factory import loan_message_factory
+from invenio_app_ils.circulation.mail.tasks import send_ils_mail
+from invenio_app_ils.errors import MissingRequiredParameterError, \
+    PatronNotFoundError
+from invenio_app_ils.proxies import current_app_ils_extension
+from invenio_app_ils.records.api import Item
 
 
 def register_circulation_signals():
     """Register Circulation signal."""
-    loan_state_changed.connect(
-        index_record_after_loan_change, weak=False
-    )
     loan_state_changed.connect(
         send_email_after_loan_change, weak=False
     )
@@ -43,11 +41,6 @@ def index_after_loan_replace_item(_, old_item_pid, new_item_pid):
         current_app_ils_extension.item_indexer.index(item)
 
 
-def index_record_after_loan_change(_, loan, prev_loan=None, trigger=None):
-    """Reindex item when attached loan changes."""
-    current_app_ils_extension.loan_indexer.index(loan)
-
-
 def send_email_after_loan_change(_, prev_loan, loan, trigger):
     """Send email notification when the loan changes."""
     _datastore = current_app.extensions["security"].datastore
@@ -56,13 +49,10 @@ def send_email_after_loan_change(_, prev_loan, loan, trigger):
     patron = _datastore.get_user(patron_pid)
 
     if not patron:
-        raise CirculationException(
-            "Patron not found with pid {}".format(patron_pid)
-        )
+        raise PatronNotFoundError(patron_pid)
     if not patron.email:
-        raise CirculationException(
-            "Patron with pid {} has no email address".format(patron_pid)
-        )
+        msg = "Patron with PID {} has no email address".format(patron_pid)
+        raise MissingRequiredParameterError(description=msg)
 
     send_ils_mail(
         loan_message_factory(),

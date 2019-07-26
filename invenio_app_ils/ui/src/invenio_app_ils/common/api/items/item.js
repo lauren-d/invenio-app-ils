@@ -4,11 +4,32 @@ import { prepareSumQuery } from '../utils';
 
 const itemURL = '/items/';
 
-const get = itemPid => {
-  return http.get(`${itemURL}${itemPid}`).then(response => {
-    response.data = serializer.fromJSON(response.data);
-    return response;
+const get = async itemPid => {
+  const response = await http.get(`${itemURL}${itemPid}`);
+  response.data = serializer.fromJSON(response.data);
+  return response;
+};
+
+const del = async itemPid => {
+  const response = await http.delete(`${itemURL}${itemPid}`);
+  return response;
+};
+
+const patch = async (itemPid, ops) => {
+  const response = await http.patch(`${itemURL}${itemPid}`, ops, {
+    headers: { 'Content-Type': 'application/json-patch+json' },
   });
+  response.data = serializer.fromJSON(response.data);
+  return response;
+};
+
+const list = async query => {
+  const response = await http.get(`${itemURL}?q=${query}`);
+  response.data.total = response.data.hits.total;
+  response.data.hits = response.data.hits.hits.map(hit =>
+    serializer.fromJSON(hit)
+  );
+  return response;
 };
 
 class QueryBuilder {
@@ -16,10 +37,11 @@ class QueryBuilder {
     this.documentQuery = [];
     this.statusQuery = [];
     this.barcodeQuery = [];
+    this.availableForCheckoutQuery = [];
   }
 
   withDocPid(documentPid) {
-    if (typeof documentPid === 'undefined' || documentPid === '') {
+    if (!documentPid) {
       throw TypeError('DocumentPid argument missing');
     }
     this.documentQuery.push(`document_pid:${prepareSumQuery(documentPid)}`);
@@ -27,15 +49,20 @@ class QueryBuilder {
   }
 
   withStatus(status) {
-    if (typeof status === 'undefined' || status === '') {
+    if (!status) {
       throw TypeError('Status argument missing');
     }
     this.statusQuery.push(`status:${prepareSumQuery(status)}`);
     return this;
   }
 
+  availableForCheckout() {
+    this.availableForCheckoutQuery.push('NOT circulation_status:*');
+    return this;
+  }
+
   withBarcode(barcode) {
-    if (typeof barcode === 'undefined' || barcode === '') {
+    if (!barcode) {
       throw TypeError('Barcode argument missing');
     }
     this.barcodeQuery.push(`barcode:${prepareSumQuery(barcode)}`);
@@ -44,7 +71,11 @@ class QueryBuilder {
 
   qs() {
     return this.documentQuery
-      .concat(this.statusQuery, this.barcodeQuery)
+      .concat(
+        this.statusQuery,
+        this.barcodeQuery,
+        this.availableForCheckoutQuery
+      )
       .join(' AND ');
   }
 }
@@ -53,19 +84,11 @@ const queryBuilder = () => {
   return new QueryBuilder();
 };
 
-const list = query => {
-  return http.get(`${itemURL}?q=${query}`).then(response => {
-    response.data.total = response.data.hits.total;
-    response.data.hits = response.data.hits.hits.map(hit =>
-      serializer.fromJSON(hit)
-    );
-    return response;
-  });
-};
-
 export const item = {
   query: queryBuilder,
   list: list,
+  patch: patch,
   get: get,
+  delete: del,
   url: itemURL,
 };

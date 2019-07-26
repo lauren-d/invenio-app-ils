@@ -25,9 +25,9 @@ def check_permission(permission):
     :param permission: The permission to check.
     """
     if permission is not None and not permission.can():
-        if current_user.is_authenticated:
-            abort(403, "You do not have a permission for this action")
-        abort(401)
+        if not current_user.is_authenticated:
+            abort(401)
+        abort(403)
 
 
 def backoffice_permission(*args, **kwargs):
@@ -59,3 +59,8 @@ def views_permissions_factory(action):
         return backoffice_permission()
     else:
         return deny_all()
+
+
+def circulation_status_permission(patron_pid):
+    """Return circulation status permission for a patron."""
+    return Permission(UserNeed(int(patron_pid)), backoffice_access_action)

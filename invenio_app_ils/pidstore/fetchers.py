@@ -9,13 +9,18 @@
 
 from invenio_pidstore.fetchers import FetchedPID
 
-from ..records.api import Document, InternalLocation, Item, Location
+from ..records.api import Document, EItem, InternalLocation, Item, Keyword, \
+    Location, Series
 
 from .pids import (  # isort:skip
     DOCUMENT_PID_TYPE,
-    INTERNAL_LOCATION_PID_TYPE,
     ITEM_PID_TYPE,
-    LOCATION_PID_TYPE
+    EITEM_PID_TYPE,
+    LOCATION_PID_TYPE,
+    INTERNAL_LOCATION_PID_TYPE,
+    KEYWORD_PID_TYPE,
+    SERIES_PID_TYPE,
+    PATRON_PID_TYPE
 )
 
 
@@ -37,6 +42,15 @@ def item_pid_fetcher(record_uuid, data):
     )
 
 
+def eitem_pid_fetcher(record_uuid, data):
+    """Return EItem PID fetcher."""
+    return FetchedPID(
+        provider=None,
+        pid_type=EITEM_PID_TYPE,
+        pid_value=str(data[EItem.pid_field])
+    )
+
+
 def location_pid_fetcher(record_uuid, data):
     """Return Location PID fetcher."""
     return FetchedPID(
@@ -47,9 +61,36 @@ def location_pid_fetcher(record_uuid, data):
 
 
 def internal_location_pid_fetcher(record_uuid, data):
-    """Return Internal location PID fetcher."""
+    """Return InternalLocation PID fetcher."""
     return FetchedPID(
         provider=None,
         pid_type=INTERNAL_LOCATION_PID_TYPE,
         pid_value=str(data[InternalLocation.pid_field])
+    )
+
+
+def keyword_pid_fetcher(record_uuid, data):
+    """Return Keyword PID fetcher."""
+    return FetchedPID(
+        provider=None,
+        pid_type=KEYWORD_PID_TYPE,
+        pid_value=str(data[Keyword.pid_field])
+    )
+
+
+def series_pid_fetcher(record_uuid, data):
+    """Return Series PID fetcher."""
+    return FetchedPID(
+        provider=None,
+        pid_type=SERIES_PID_TYPE,
+        pid_value=str(data[Series.pid_field])
+    )
+
+
+def patron_pid_fetcher(record_uuid, data):
+    """Dummy patron fetcher."""
+    return FetchedPID(
+        provider=None,
+        pid_type=PATRON_PID_TYPE,
+        pid_value=str(data['id']),
     )

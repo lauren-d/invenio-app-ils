@@ -1,53 +1,46 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { generatePath } from 'react-router';
 import { Loader, Error } from '../../../../../../common/components';
 import { ResultsTable } from '../../../../../../common/components';
-import {
-  BackOfficeURLS,
-  loanSearchQueryUrl,
-} from '../../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../../routes/urls';
 import { listQuery } from './state/listQuery';
-import { toShortDate } from '../../../../../../common/api/date';
 import { formatter } from '../../../../../../common/components/ResultsTable/formatters';
 import { SeeAllButton } from '../../../../components/buttons';
+import { goTo, goToHandler } from '../../../../../../history';
+import pick from 'lodash/pick';
 
 export default class RenewedLoansList extends Component {
   constructor(props) {
     super(props);
     this.fetchRenewedLoans = props.fetchRenewedLoans;
-    this.showDetailsUrl = BackOfficeURLS.loanDetails;
-    this.seeAllUrl = loanSearchQueryUrl;
+    this.showDetailsUrl = BackOfficeRoutes.loanDetailsFor;
+    this.seeAllUrl = BackOfficeRoutes.loansListWithQuery;
   }
 
   componentDidMount() {
     this.fetchRenewedLoans();
   }
 
-  _showDetailsHandler = loan_pid =>
-    this.props.history.push(
-      generatePath(this.showDetailsUrl, { loanPid: loan_pid })
+  seeAllButton = () => {
+    return (
+      <SeeAllButton clickHandler={goToHandler(this.seeAllUrl(listQuery))} />
     );
-
-  _seeAllButton = () => {
-    const _click = () => {
-      this.props.history.push(this.seeAllUrl(listQuery));
-    };
-
-    return <SeeAllButton clickHandler={() => _click()} />;
   };
 
   prepareData(data) {
     return data.hits.map(row => {
-      let serialized = formatter.loan.toTable(row);
-      delete serialized['Request created'];
-      serialized['Last update'] = toShortDate(row.updated);
-      serialized['Renewals'] = row.extension_count;
-      return serialized;
+      return pick(formatter.loan.toTable(row), [
+        'ID',
+        'Patron ID',
+        'State',
+        'Item barcode',
+        'End date',
+        'Renewals',
+      ]);
     });
   }
 
-  _render_table(data) {
+  renderTable(data) {
     const rows = this.prepareData(data);
     rows.totalHits = data.total;
     return (
@@ -55,19 +48,19 @@ export default class RenewedLoansList extends Component {
         rows={rows}
         title={'Frequently renewed loans'}
         subtitle={'Loans renewed more than 3 times - last 7 days.'}
-        rowActionClickHandler={this._showDetailsHandler}
-        seeAllComponent={this._seeAllButton()}
+        name={'frequently renewed loans'}
+        rowActionClickHandler={row => goTo(this.showDetailsUrl(row.ID))}
+        seeAllComponent={this.seeAllButton()}
         showMaxRows={this.props.showMaxEntries}
       />
     );
   }
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._render_table(data)}</Error>
+        <Error error={error}>{this.renderTable(data)}</Error>
       </Loader>
     );
   }

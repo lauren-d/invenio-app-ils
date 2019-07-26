@@ -2,13 +2,13 @@
 
 exports[`OverbookedDocumentsList tests should load the details component 1`] = `
 <Loader>
-  <Error
-    error={null}
-  >
+  <Error>
     <ResultsTable
       fixed={true}
       headerActionClickHandler={null}
       headerActionComponent={null}
+      name="overbooked documents"
+      renderSegment={true}
       rowActionClickHandler={[Function]}
       rows={Array []}
       seeAllComponent={
@@ -33,21 +33,33 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
     Object {
       "hits": Array [
         Object {
-          "ID": "doc1",
-          "circulation": Object {
-            "loanableItems": 2,
-            "pendingLoans": 1,
-          },
           "created": "2018-01-01T10:05:00.000Z",
           "document_pid": "doc1",
-          "title": "X",
+          "id": 1,
+          "metadata": Object {
+            "abstracts": "This is an abstract",
+            "authors": Array [
+              "Author1",
+            ],
+            "circulation": Object {
+              "has_items_for_loan": 2,
+              "pending_loans": 1,
+            },
+            "title": "X",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
         Object {
-          "ID": "doc2",
           "created": "2018-01-01T10:05:00.000Z",
           "document_pid": "doc2",
-          "title": "X",
+          "id": 2,
+          "metadata": Object {
+            "abstracts": "This is an abstract",
+            "authors": Array [
+              "Author1",
+            ],
+            "title": "X",
+          },
           "updated": "2018-01-01T10:05:00.000Z",
         },
       ],
@@ -55,24 +67,23 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
     }
   }
   fetchOverbookedDocuments={[Function]}
-  history={[Function]}
   showMaxEntries={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={true}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="overbooked documents"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={
           Array [
             Object {
               "ID": "doc1",
-              "Loan requests": undefined,
-              "Loanable items": undefined,
+              "Items": 2,
+              "Requests": 1,
               "Title": "X",
             },
             Object {
@@ -161,8 +172,8 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
                     Array [
                       "ID",
                       "Title",
-                      "Loan requests",
-                      "Loanable items",
+                      "Requests",
+                      "Items",
                     ]
                   }
                   withRowAction={true}
@@ -232,7 +243,7 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="Loan requests"
+                            key="Requests"
                           >
                             <TableCell
                               as="th"
@@ -241,13 +252,13 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
                               <th
                                 className=""
                               >
-                                Loan requests
+                                Requests
                               </th>
                             </TableCell>
                           </TableHeaderCell>
                           <TableHeaderCell
                             as="th"
-                            key="Loanable items"
+                            key="Items"
                           >
                             <TableCell
                               as="th"
@@ -256,7 +267,7 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
                               <th
                                 className=""
                               >
-                                Loanable items
+                                Items
                               </th>
                             </TableCell>
                           </TableHeaderCell>
@@ -270,8 +281,8 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
                     Array [
                       "ID",
                       "Title",
-                      "Loan requests",
-                      "Loanable items",
+                      "Requests",
+                      "Items",
                     ]
                   }
                   rowActionClickHandler={[Function]}
@@ -279,8 +290,8 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
                     Array [
                       Object {
                         "ID": "doc1",
-                        "Loan requests": undefined,
-                        "Loanable items": undefined,
+                        "Items": 2,
+                        "Requests": 1,
                         "Title": "X",
                       },
                       Object {
@@ -365,26 +376,26 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Loan requests-doc1"
+                            data-test="Requests-doc1"
                             key="2-doc1"
                           >
                             <td
                               className=""
-                              data-test="Loan requests-doc1"
+                              data-test="Requests-doc1"
                             >
-                              -
+                              1
                             </td>
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Loanable items-doc1"
+                            data-test="Items-doc1"
                             key="3-doc1"
                           >
                             <td
                               className=""
-                              data-test="Loanable items-doc1"
+                              data-test="Items-doc1"
                             >
-                              -
+                              2
                             </td>
                           </TableCell>
                         </tr>
@@ -458,24 +469,24 @@ exports[`OverbookedDocumentsList tests should render documents 1`] = `
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Loan requests-doc2"
+                            data-test="Requests-doc2"
                             key="2-doc2"
                           >
                             <td
                               className=""
-                              data-test="Loan requests-doc2"
+                              data-test="Requests-doc2"
                             >
                               -
                             </td>
                           </TableCell>
                           <TableCell
                             as="td"
-                            data-test="Loanable items-doc2"
+                            data-test="Items-doc2"
                             key="3-doc2"
                           >
                             <td
                               className=""
-                              data-test="Loanable items-doc2"
+                              data-test="Items-doc2"
                             >
                               -
                             </td>
@@ -516,17 +527,16 @@ exports[`OverbookedDocumentsList tests should render show a message with no docu
     }
   }
   fetchOverbookedDocuments={[Function]}
-  history={[Function]}
   showMaxEntries={5}
 >
   <Loader>
-    <Error
-      error={null}
-    >
+    <Error>
       <ResultsTable
         fixed={true}
         headerActionClickHandler={null}
         headerActionComponent={null}
+        name="overbooked documents"
+        renderSegment={true}
         rowActionClickHandler={[Function]}
         rows={Array []}
         seeAllComponent={
@@ -602,6 +612,8 @@ exports[`OverbookedDocumentsList tests should render show a message with no docu
                 data-test="no-results"
               >
                 There are no 
+                overbooked documents
+                .
               </div>
             </Message>
           </div>

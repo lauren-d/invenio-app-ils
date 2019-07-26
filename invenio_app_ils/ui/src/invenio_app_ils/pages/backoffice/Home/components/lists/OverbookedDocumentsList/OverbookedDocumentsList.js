@@ -1,52 +1,45 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { generatePath } from 'react-router';
 import { Loader, Error } from '../../../../../../common/components';
 import { ResultsTable } from '../../../../../../common/components';
 import { document as documentApi } from '../../../../../../common/api';
-import {
-  BackOfficeURLS,
-  documentsSearchQueryUrl,
-} from '../../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../../routes/urls';
 import { formatter } from '../../../../../../common/components/ResultsTable/formatters';
 import { SeeAllButton } from '../../../../components/buttons';
+import { goTo, goToHandler } from '../../../../../../history';
+import pick from 'lodash/pick';
 
 export default class OverbookedDocumentsList extends Component {
   constructor(props) {
     super(props);
     this.fetchOverbookedDocuments = props.fetchOverbookedDocuments;
-    this.showDetailsUrl = BackOfficeURLS.documentDetails;
-    this.seeAllUrl = documentsSearchQueryUrl;
+    this.showDetailsUrl = BackOfficeRoutes.documentDetailsFor;
+    this.seeAllUrl = BackOfficeRoutes.documentsListWithQuery;
   }
 
   componentDidMount() {
     this.fetchOverbookedDocuments();
   }
 
-  _showDetailsHandler = document_pid =>
-    this.props.history.push(
-      generatePath(this.showDetailsUrl, { documentPid: document_pid })
+  seeAllButton = () => {
+    const path = this.seeAllUrl(
+      documentApi
+        .query()
+        .overbooked()
+        .qs()
     );
 
-  _seeAllButton = () => {
-    const _click = () =>
-      this.props.history.push(
-        this.seeAllUrl(
-          documentApi
-            .query()
-            .overbooked()
-            .qs()
-        )
-      );
-
-    return <SeeAllButton clickHandler={() => _click()} />;
+    return <SeeAllButton clickHandler={goToHandler(path)} />;
   };
 
   prepareData(data) {
-    return data.hits.map(row => formatter.document.toTable(row));
+    return data.hits.map(row => {
+      let entry = formatter.document.toTable(row);
+      return pick(entry, ['ID', 'Title', 'Requests', 'Items']);
+    });
   }
 
-  _render_table(data) {
+  renderTable(data) {
     const rows = this.prepareData(data);
     rows.totalHits = data.total;
     return (
@@ -56,8 +49,9 @@ export default class OverbookedDocumentsList extends Component {
         subtitle={
           'Documents with more requests than the number of available items for loan.'
         }
-        rowActionClickHandler={this._showDetailsHandler}
-        seeAllComponent={this._seeAllButton()}
+        name={'overbooked documents'}
+        rowActionClickHandler={row => goTo(this.showDetailsUrl(row.ID))}
+        seeAllComponent={this.seeAllButton()}
         showMaxRows={this.props.showMaxEntries}
         fixed
         singleLine
@@ -66,11 +60,10 @@ export default class OverbookedDocumentsList extends Component {
   }
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._render_table(data)}</Error>
+        <Error error={error}>{this.renderTable(data)}</Error>
       </Loader>
     );
   }

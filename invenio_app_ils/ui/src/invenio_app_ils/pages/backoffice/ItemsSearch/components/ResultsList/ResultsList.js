@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { item as itemApi } from '../../../../../common/api';
-import { fromISO, toShortDate } from '../../../../../common/api/date';
-import { openRecordEditor } from '../../../../../common/urls';
+import { openRecordEditor } from '../../../../../routes/urls';
 import { ResultsTable } from '../../../../../common/components';
 import { NewButton } from '../../../components/buttons';
+import { formatter } from '../../../../../common/components/ResultsTable/formatters';
+import omit from 'lodash/omit';
 
 export class ResultsList extends Component {
   constructor(props) {
@@ -12,17 +13,10 @@ export class ResultsList extends Component {
     this.viewDetailsClickHandler = this.props.viewDetailsClickHandler;
   }
 
-  _getFormattedDate = d => (d ? toShortDate(fromISO(d)) : '');
-
   prepareData() {
-    return this.props.results.map(row => ({
-      ID: row.metadata.item_pid,
-      'Document ID': row.metadata.document_pid,
-      Status: row.metadata.status,
-      'Internal location': row.metadata.internal_location.name,
-      Created: this._getFormattedDate(row.created),
-      Updated: this._getFormattedDate(row.updated),
-    }));
+    return this.props.results.map(row => {
+      return omit(formatter.item.toTable(row), ['Created', 'Updated']);
+    });
   }
 
   render() {
@@ -44,6 +38,7 @@ export class ResultsList extends Component {
       <ResultsTable
         rows={rows}
         title={''}
+        name={'items'}
         headerActionComponent={headerActionComponent}
         rowActionClickHandler={this.viewDetailsClickHandler}
         showMaxRows={maxRowsToShow}

@@ -1,13 +1,10 @@
-import {
-  IS_LOADING,
-  SUCCESS,
-  HAS_ERROR,
-  ACTION_IS_LOADING,
-  ACTION_SUCCESS,
-  ACTION_HAS_ERROR,
-} from './types';
+import { IS_LOADING, SUCCESS, HAS_ERROR } from './types';
 import { loan as loanApi } from '../../../../common/api';
 import { sessionManager } from '../../../../authentication/services';
+import {
+  sendSuccessNotification,
+  sendErrorNotification,
+} from '../../../../common/components/Notifications';
 
 export const fetchLoanDetails = loanPid => {
   return async dispatch => {
@@ -32,25 +29,40 @@ export const fetchLoanDetails = loanPid => {
   };
 };
 
-export const performLoanAction = (pid, loan, url) => {
+export const performLoanAction = (pid, loan, url, cancelReason = null) => {
   return async dispatch => {
     dispatch({
-      type: ACTION_IS_LOADING,
+      type: IS_LOADING,
     });
     const currentUser = sessionManager.user;
+    const params = cancelReason ? { cancel_reason: cancelReason } : {};
     await loanApi
-      .postAction(url, pid, loan, currentUser.id, currentUser.locationPid)
+      .postAction(
+        url,
+        pid,
+        loan,
+        currentUser.id,
+        currentUser.locationPid,
+        params
+      )
       .then(details => {
         dispatch({
-          type: ACTION_SUCCESS,
+          type: SUCCESS,
           payload: details.data,
         });
+        dispatch(
+          sendSuccessNotification(
+            'Successful loan action!',
+            `The loan action was successful for loan PID ${pid}.`
+          )
+        );
       })
       .catch(error => {
         dispatch({
-          type: ACTION_HAS_ERROR,
+          type: HAS_ERROR,
           payload: error,
         });
+        dispatch(sendErrorNotification(error));
       });
   };
 };

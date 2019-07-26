@@ -1,12 +1,17 @@
-import { IS_LOADING, SUCCESS, HAS_ERROR } from './types';
-import createLoanReducer from '../components/ItemMetadata/components/CreateNewLoanModal/state/reducer';
-import { initialState as newLoanCreateInitialState } from '../components/ItemMetadata/components/CreateNewLoanModal/state/reducer';
+import {
+  IS_LOADING,
+  SUCCESS,
+  HAS_ERROR,
+  DELETE_IS_LOADING,
+  DELETE_SUCCESS,
+  DELETE_HAS_ERROR,
+} from './types';
 
 export const initialState = {
   isLoading: true,
   hasError: false,
   data: { hits: [], total: 0 },
-  ...newLoanCreateInitialState,
+  error: {},
 };
 
 export default (state = initialState, action) => {
@@ -18,16 +23,31 @@ export default (state = initialState, action) => {
         ...state,
         isLoading: false,
         data: action.payload,
+        error: {},
         hasError: false,
       };
     case HAS_ERROR:
       return {
         ...state,
         isLoading: false,
-        data: action.payload,
+        error: action.payload,
+        hasError: true,
+      };
+    case DELETE_IS_LOADING:
+      return { ...state, isLoading: true };
+    case DELETE_SUCCESS:
+      return {
+        ...state,
+        isLoading: true,
+      };
+    case DELETE_HAS_ERROR:
+      return {
+        ...state,
+        isLoading: false,
+        error: action.payload,
         hasError: true,
       };
     default:
-      return createLoanReducer(state, action);
+      return state;
   }
 };

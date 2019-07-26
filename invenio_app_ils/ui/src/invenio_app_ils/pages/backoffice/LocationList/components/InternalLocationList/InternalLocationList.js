@@ -1,40 +1,72 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { internalLocation as internalLocationApi } from '../../../../../common/api';
-import { openRecordEditor } from '../../../../../common/urls';
+import {
+  internalLocation as internalLocationApi,
+  item as itemApi,
+} from '../../../../../common/api';
+import { openRecordEditor } from '../../../../../routes/urls';
 import { Error, Loader, ResultsTable } from '../../../../../common/components';
 import { Button } from 'semantic-ui-react';
 import { NewButton } from '../../../components/buttons';
+import { formatter } from '../../../../../common/components/ResultsTable/formatters';
+import { DeleteRecordModal } from '../../../../backoffice/components';
+import omit from 'lodash/omit';
 
 export default class InternalLocationList extends Component {
   constructor(props) {
     super(props);
-    this.fetchInternalLocations = this.props.fetchInternalLocations;
+    this.fetchInternalLocations = props.fetchInternalLocations;
+    this.deleteInternalLocation = props.deleteInternalLocation;
   }
 
   componentDidMount() {
     this.fetchInternalLocations();
   }
 
-  prepareData(data) {
-    return data.hits.map(row => ({
-      ID: row.internal_location_pid,
-      Name: row.name,
-      'Physical Location': row.physical_location,
-      'Location Name': row.location_name,
-      Actions: (
-        <Button
-          size="small"
-          content={'Edit'}
-          onClick={() =>
-            openRecordEditor(internalLocationApi.url, row.internal_location_pid)
-          }
-        />
-      ),
-    }));
+  handleOnRefClick(itemPid) {
+    openRecordEditor(itemApi.url, itemPid);
   }
 
-  _renderResults(data) {
+  createRefProps(ilocPid) {
+    return [
+      {
+        refType: 'Item',
+        onRefClick: this.handleOnRefClick,
+        getRefData: () => itemApi.list(`internal_location_pid:${ilocPid}`),
+      },
+    ];
+  }
+
+  rowActions(ilocPid) {
+    return (
+      <>
+        <Button
+          icon={'edit'}
+          size="small"
+          title={'Edit Record'}
+          onClick={() => openRecordEditor(internalLocationApi.url, ilocPid)}
+        />
+        <DeleteRecordModal
+          refProps={this.createRefProps(ilocPid)}
+          onDelete={() => this.deleteInternalLocation(ilocPid)}
+          deleteHeader={`Are you sure you want to delete the Internal Location
+          record with ID ${ilocPid}?`}
+        />
+      </>
+    );
+  }
+
+  prepareData(data) {
+    const rows = data.hits.map(row => {
+      let serialized = formatter.internalLocation.toTable(row);
+      serialized['Actions'] = this.rowActions(row.internal_location_pid);
+      return omit(serialized, ['Created', 'Updated', 'Link']);
+    });
+    rows.totalHits = data.total;
+    return rows;
+  }
+
+  renderResults(data) {
     const rows = this.prepareData(data);
     const headerActionComponent = (
       <NewButton
@@ -47,6 +79,7 @@ export default class InternalLocationList extends Component {
       <ResultsTable
         rows={rows}
         title={'Internal Locations'}
+        name={'internal locations'}
         headerActionComponent={headerActionComponent}
         showMaxRows={this.props.showMaxItems}
       />
@@ -54,11 +87,10 @@ export default class InternalLocationList extends Component {
   }
 
   render() {
-    let { data, hasError, isLoading } = this.props;
-    const errorData = hasError ? data : null;
+    let { data, error, isLoading } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._renderResults(data)}</Error>
+        <Error error={error}>{this.renderResults(data)}</Error>
       </Loader>
     );
   }

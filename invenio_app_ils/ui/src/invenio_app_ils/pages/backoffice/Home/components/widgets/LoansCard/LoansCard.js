@@ -3,65 +3,60 @@ import PropTypes from 'prop-types';
 import { Loader, Error } from '../../../../../../common/components';
 import { loan as loanApi } from '../../../../../../common/api';
 import { RecordsBriefCard } from '../../../../components/statistics/RecordsBriefCard';
-import {
-  loanSearchQueryUrl,
-  BackOfficeURLS,
-} from '../../../../../../common/urls';
+import { BackOfficeRoutes } from '../../../../../../routes/urls';
 import { NewButton, SeeAllButton } from '../../../../components/buttons';
+import { goToHandler } from '../../../../../../history';
 
 export default class LoansCard extends Component {
   constructor(props) {
     super(props);
     this.fetchPendingLoans = props.fetchPendingLoans;
-    this.seeAllUrl = loanSearchQueryUrl;
-    this.loanCheckout = BackOfficeURLS.loanCheckout;
+    this.seeAllUrl = BackOfficeRoutes.loansListWithQuery;
   }
 
   componentDidMount() {
     this.fetchPendingLoans();
   }
 
-  _seeAllButton = () => {
-    const handler = () =>
-      this.props.history.push(
-        this.seeAllUrl(
-          loanApi
-            .query()
-            .withState('PENDING')
-            .qs()
-        )
-      );
-    return <SeeAllButton fluid disabled clickHandler={() => handler()} />;
+  seeAllButton = () => {
+    const path = this.seeAllUrl(
+      loanApi
+        .query()
+        .withState('PENDING')
+        .qs()
+    );
+    return <SeeAllButton fluid disabled clickHandler={goToHandler(path)} />;
   };
 
-  _newLoanButton = () => {
+  newLoanButton = () => {
     return (
       <NewButton
         fluid
         disabled
-        clickHandler={() => this.props.history.push(this.loanCheckout)}
+        clickHandler={() => {
+          /* not implemented */
+        }}
       />
     );
   };
 
-  _render_card = data => {
+  renderCard = data => {
     return (
       <RecordsBriefCard
         title={'Loans'}
         stats={data}
         text={'new requests'}
-        buttonLeft={this._newLoanButton()}
-        buttonRight={this._seeAllButton()}
+        buttonLeft={this.newLoanButton()}
+        buttonRight={this.seeAllButton()}
       />
     );
   };
 
   render() {
-    const { data, isLoading, hasError } = this.props;
-    const errorData = hasError ? data : null;
+    const { data, isLoading, error } = this.props;
     return (
       <Loader isLoading={isLoading}>
-        <Error error={errorData}>{this._render_card(data)}</Error>
+        <Error error={error}>{this.renderCard(data)}</Error>
       </Loader>
     );
   }

@@ -3,18 +3,19 @@ import { mount } from 'enzyme';
 import { Settings } from 'luxon';
 import { fromISO, toISO } from '../../../../common/api/date';
 import { ResultsList } from '../components';
+import { formatter } from '../../../../common/components/ResultsTable/formatters';
 
 Settings.defaultZoneName = 'utc';
 
 describe('LoansSearch ResultsList tests', () => {
-  const d = fromISO('2018-01-01T11:05:00+01:00');
-  const start = d.plus({ days: 1 });
-  const end = d.plus({ months: 1 });
+  const stringDate = fromISO('2018-01-01T11:05:00+01:00');
+  const start = stringDate.plus({ days: 1 });
+  const end = stringDate.plus({ months: 1 });
 
   const results = [
     {
       id: 3,
-      created: toISO(d),
+      created: toISO(stringDate),
       metadata: {
         state: 'ITEM_ON_LOAN',
         patron_pid: 1,
@@ -71,6 +72,7 @@ describe('LoansSearch ResultsList tests', () => {
       .filterWhere(element => element.prop('data-test') === firstId)
       .find('button');
     button.simulate('click');
-    expect(mockedClickHandler).toHaveBeenCalledWith(firstId);
+    const expected = formatter.loan.toTable(results[0]);
+    expect(mockedClickHandler).toHaveBeenCalledWith(expected);
   });
 });

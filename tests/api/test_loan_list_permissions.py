@@ -11,9 +11,14 @@ from __future__ import absolute_import, print_function
 
 import json
 
+import pytest
 from flask import url_for
 from invenio_accounts.models import User
 from invenio_accounts.testutils import login_user_via_session
+
+from invenio_app_ils.circulation.search import IlsLoansSearch, \
+    circulation_search_factory
+from invenio_app_ils.errors import UnauthorizedSearchError
 
 NEW_LOAN = {
     "item_pid": "200",
@@ -50,14 +55,22 @@ def test_admin_or_librarian_can_search_any_loan(client, json_headers, users,
         assert len(hits['hits']['hits']) == len(testdata['loans'])
 
 
+def test_anonymous_loans_search(app):
+    """Test that not logged in users are unable to search."""
+    with app.test_request_context("/"):
+        with pytest.raises(UnauthorizedSearchError):
+            circulation_search_factory(None, IlsLoansSearch())
+
+
 def test_patrons_can_search_their_own_loans(client, json_headers, users,
                                             testdata):
     """Test that patrons can search their own loans."""
-
-    def _validate_only_patron_loans(res, user):
+    def _validate_only_patron_loans(res, user, state):
         """Assert that result loans belong to the given user only."""
-        patron_loans = [l for l in testdata['loans'] if
-                        l['patron_pid'] == str(user.id)]
+        patron_loans = [
+            l for l in testdata['loans']
+            if l['patron_pid'] == str(user.id) and l['state'] == state
+        ]
 
         assert res.status_code == 200
         hits = json.loads(res.data.decode('utf-8'))
@@ -65,16 +78,18 @@ def test_patrons_can_search_their_own_loans(client, json_headers, users,
         for hit in hits['hits']['hits']:
             assert hit['metadata']['patron_pid'] == str(user.id)
 
+    state = 'PENDING'
     for user in [users['patron1'], users['patron2']]:
         # search with no params
-        res = _search_loans(client, json_headers, user=user)
-        _validate_only_patron_loans(res, user)
+        res = _search_loans(client, json_headers, user=user,
+                            state=state)
+        _validate_only_patron_loans(res, user, state)
 
         # search with params
         res = _search_loans(client, json_headers, user=user,
-                            state='PENDING',  # test extra query
+                            state=state,  # test extra query
                             q="patron_pid:{}".format(str(user.id)))
-        _validate_only_patron_loans(res, user)
+        _validate_only_patron_loans(res, user, state)
 
 
 def test_patrons_cannot_search_other_loans(client, json_headers, users,

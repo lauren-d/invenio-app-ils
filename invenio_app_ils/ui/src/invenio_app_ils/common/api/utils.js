@@ -1,8 +1,8 @@
-export const prepareDateQuery = (field, date, date_from, date_to) => {
+export const prepareDateQuery = (field, date, dateFrom, dateTo) => {
   if (
     (!date || typeof date !== 'string') &&
-    (!date_from || typeof date_from !== 'string') &&
-    (!date_to || typeof date_to !== 'string')
+    (!dateFrom || typeof dateFrom !== 'string') &&
+    (!dateTo || typeof dateTo !== 'string')
   ) {
     throw TypeError(
       'Date arguments invalid or missing ' +
@@ -12,12 +12,12 @@ export const prepareDateQuery = (field, date, date_from, date_to) => {
   if (date) {
     return encodeURI(`${field}:${date}`);
   }
-  if (date_from && date_to) {
-    return encodeURI(`${field}:{${date_from} TO ${date_to}}`);
-  } else if (date_from) {
-    return encodeURI(`${field}:{${date_from} TO *}`);
+  if (dateFrom && dateTo) {
+    return encodeURI(`${field}:{${dateFrom} TO ${dateTo}}`);
+  } else if (dateFrom) {
+    return encodeURI(`${field}:{${dateFrom} TO *}`);
   } else {
-    return encodeURI(`${field}:{* TO ${date_to}}`);
+    return encodeURI(`${field}:{* TO ${dateTo}}`);
   }
 };
 
@@ -28,4 +28,15 @@ export const prepareSumQuery = param => {
   } else {
     return param;
   }
+};
+
+export const recordToPid = record => {
+  const schema = record.metadata['$schema'];
+  if (schema.includes('/documents/document-')) {
+    return [record['document_pid'], 'docid'];
+  } else if (schema.includes('/series/series-')) {
+    return [record['series_pid'], 'serid'];
+  }
+
+  throw Error(`Failed to find pid type of record: ${record}`);
 };

@@ -4,8 +4,10 @@ import { Settings } from 'luxon';
 import { fromISO } from '../../../../../../common/api/date';
 import ItemPastLoans from '../ItemPastLoans';
 
+jest.mock('../../../../../../common/config');
+
 Settings.defaultZoneName = 'utc';
-const d = fromISO('2018-01-01T11:05:00+01:00');
+const stringDate = fromISO('2018-01-01T11:05:00+01:00');
 
 describe('ItemPastLoans tests', () => {
   let component;
@@ -16,6 +18,7 @@ describe('ItemPastLoans tests', () => {
   });
 
   const item = {
+    item_pid: 222,
     metadata: {
       document_pid: 111,
       item_pid: 222,
@@ -25,8 +28,7 @@ describe('ItemPastLoans tests', () => {
   it('should load the past loans component', () => {
     const component = shallow(
       <ItemPastLoans
-        item={item}
-        history={() => {}}
+        itemDetails={item}
         data={{ hits: [], total: 0 }}
         fetchPastLoans={() => {}}
       />
@@ -38,8 +40,7 @@ describe('ItemPastLoans tests', () => {
     const mockedFetchPastLoans = jest.fn();
     component = mount(
       <ItemPastLoans
-        item={item}
-        history={() => {}}
+        itemDetails={item}
         data={{ hits: [], total: 0 }}
         fetchPastLoans={mockedFetchPastLoans}
       />
@@ -50,8 +51,7 @@ describe('ItemPastLoans tests', () => {
   it('should render show a message with no past loans', () => {
     component = mount(
       <ItemPastLoans
-        item={item}
-        history={() => {}}
+        itemDetails={item}
         data={{ hits: [], total: 0 }}
         fetchPastLoans={() => {}}
       />
@@ -68,34 +68,35 @@ describe('ItemPastLoans tests', () => {
     const data = {
       hits: [
         {
+          id: 1,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan1',
-          patron_pid: 'patron_1',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
-          state: 'ITEM_RETURNED',
+          metadata: {
+            loan_pid: 'loan1',
+            patron_pid: 'patron_1',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
         {
+          id: 2,
+          updated: stringDate,
+          created: stringDate,
           loan_pid: 'loan2',
-          patron_pid: 'patron_2',
-          updated: d,
-          created: d,
-          start_date: d,
-          end_date: d,
-          state: 'CANCELLED',
+          metadata: {
+            loan_pid: 'loan2',
+            patron_pid: 'patron_2',
+            start_date: stringDate,
+            end_date: stringDate,
+          },
         },
       ],
       total: 2,
     };
 
     component = mount(
-      <ItemPastLoans
-        item={item}
-        history={() => {}}
-        data={data}
-        fetchPastLoans={() => {}}
-      />
+      <ItemPastLoans itemDetails={item} data={data} fetchPastLoans={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
