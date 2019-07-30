@@ -66,6 +66,7 @@ install_requires = [
     # until flask-sqlalchemy is fixed
     "SQLAlchemy>=1.2.16,<1.3.0",
     "invenio-pidrelations>=1.0.0a5,<1.1.0",
+    "invenio-db<=1.0.3"
 ]
 
 packages = find_packages()
